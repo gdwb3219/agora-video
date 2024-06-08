@@ -13,3 +13,10 @@
   justify-content: center;
   margin-top: 20px;
 }
+
+.remote-player {
+  width: 400px;
+  height: 300px;
+  margin: 10px;
+  border: 2px solid #ccc;
+}

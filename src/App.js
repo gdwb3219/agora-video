@@ -1,61 +1,37 @@
-import {
-  LocalUser,
-  RemoteUser,
-  useIsConnected,
-  useJoin,
-  useLocalMicrophoneTrack,
-  useLocalCameraTrack,
-  usePublish,
-  useRemoteUsers,
-} from "agora-rtc-react";
+// src/App.js
 import React, { useState } from "react";
+import VideoCall from "./components/VideoCall";
+import "./App.css";
 
-// import "./styles.css";
-// import logo from "./logo.png";
-export const Basics = () => {
-  
-  // Define state variables
-  const [calling, setCalling] = useState(false); // Is calling
-  const [appId, setAppId] = useState(""); // Store the app ID state
-  const [channel, setChannel] = useState(""); // Store the channel name state 
-  const [token, setToken] = useState(""); // Store the token state 
+function App() {
+  const [isOperator, setIsOperator] = useState(false);
+  const [inCall, setInCall] = useState(false);
 
-  // Use app ID, channel name and token to join the channel.
-  // Whether to join the channel depends on the status of calling
-  useJoin({appid: appId, channel: channel, token: token ? token : null}, calling);
+  const joinAsUser = () => {
+    setIsOperator(false);
+    setInCall(true);
+  };
+
+  const joinAsOperator = () => {
+    setIsOperator(true);
+    setInCall(true);
+  };
 
   return (
-    <>
-      <div className="room">
-          <div className="join-room">
-            {/* <img alt="agora-logo" className="logo" src={logo} /> */}
-            <input
-              onChange={e => setAppId(e.target.value)}
-              placeholder="<Your app ID>"
-              value={appId}
-            />
-            <input
-              onChange={e => setChannel(e.target.value)}
-              placeholder="<Your channel Name>"
-              value={channel}
-            />
-            <input
-              onChange={e => setToken(e.target.value)}
-              placeholder="<Your token>"
-              value={token}
-            />
-
-            <button
-              className={`join-channel ${!appId || !channel ? "disabled" : ""}`}
-              disabled={!appId || !channel}
-              onClick={() => setCalling(true)}
-            >
-              <span>Join Channel</span>
-            </button>
-          </div>
-      </div>
-    </>
+    <div className='App'>
+      <header className='App-header'>
+        <h1>Agora 1-on-1 Video Call with Monitoring</h1>
+      </header>
+      {!inCall ? (
+        <div className='join-buttons'>
+          <button onClick={joinAsUser}>Join as User</button>
+          <button onClick={joinAsOperator}>Join as Operator</button>
+        </div>
+      ) : (
+        <VideoCall isOperator={isOperator} />
+      )}
+    </div>
   );
-};
+}
 
-export default Basics;
+export default App;

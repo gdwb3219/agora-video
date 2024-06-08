@@ -24,6 +24,13 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
+      <!-- Include the React development libraries (must be introduced in this order) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- If the above React libraries have already been integrated through npm, skip them and include only the Agora RTC React SDK -->
+    <script src="https://download.agora.io/sdk/release/agora-rtc-react.2.1.0.js"></script>
+
     <title>React App</title>
   </head>
   <body>

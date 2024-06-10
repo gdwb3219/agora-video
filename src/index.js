@@ -10,10 +10,10 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8"});
 
 root.render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <AgoraRTCProvider client={client}>
       <App />
     </AgoraRTCProvider>
-  </React.StrictMode>
+  // </React.StrictMode>
 );
 

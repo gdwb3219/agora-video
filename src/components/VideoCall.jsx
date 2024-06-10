@@ -8,6 +8,8 @@ const CHANNEL_NAME = "testChannel"; // 사용할 채널 이름
 const TOKEN = null; // 필요하지 않으면 null
 
 function VideoCall({ isOperator }) {
+
+  console.log("나는 비디오 콜을 실행했지!!!")
   const client = useRef(null);
   const localContainer = useRef(null);
   const remoteContainer = useRef(null);
@@ -16,12 +18,16 @@ function VideoCall({ isOperator }) {
     const initAgora = async () => {
       // Agora 클라이언트 초기화
       client.current = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
-      await client.current.join(APP_ID, CHANNEL_NAME, TOKEN, null);
+      let UID = await client.current.join(APP_ID, CHANNEL_NAME, TOKEN, null);
+      console.log(UID, "client UID 이려나???------------------------------------------------------------------------------")
 
       if (!isOperator) {
         // 로컬 오디오 및 비디오 트랙 생성 (관리자는 생략)
         const [microphoneTrack, cameraTrack] =
           await AgoraRTC.createMicrophoneAndCameraTracks();
+
+        // 비디오 트랙을 재생 및 게시
+        console.log(localContainer.current, "local Container UID 이려나???------------------------------------------------------------------------------")
         cameraTrack.play(localContainer.current);
         await client.current.publish([microphoneTrack, cameraTrack]);
       }
@@ -63,13 +69,25 @@ function VideoCall({ isOperator }) {
     };
   }, [isOperator]);
 
+  const handleLeave = async () => {
+    // console.log(client.current.localTracks, "로컬 트랙이 지금 뭐가 있어?")
+    client.current.localTracks.forEach((track) => track.stop());
+    // await client.leave();
+  }
+
+  console.log("나는 비디오 콜을 실행했었지!!!")
+
   return (
-    <div className='video-call'>
-      {!isOperator && (
-        <div ref={localContainer} className='local-container'></div>
-      )}
-      <div ref={remoteContainer} className='remote-container'></div>
-    </div>
+    <>
+      <button onClick={handleLeave}>Leave</button>
+      <div className='video-call'>
+        {!isOperator && (
+          <div ref={localContainer} className='local-container'></div>
+        )}
+        <div ref={remoteContainer} className='remote-container'></div>
+      </div>
+    </>
+    
   );
 }
 

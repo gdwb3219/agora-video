@@ -35,6 +35,7 @@ function VideoCall({ isOperator }) {
       // 원격 사용자가 참가할 때 처리
       client.current.on("user-published", async (user, mediaType) => {
         await client.current.subscribe(user, mediaType);
+        console.log('구독 성공!', user, mediaType)
         if (mediaType === "video") {
           const remoteVideoContainer = document.createElement("div");
           remoteVideoContainer.id = user.uid.toString();
@@ -82,8 +83,12 @@ function VideoCall({ isOperator }) {
       <button onClick={handleLeave}>Leave</button>
       <div className='video-call'>
         {!isOperator && (
-          <div ref={localContainer} className='local-container'></div>
+          <>
+            <p>Local User</p>
+            <div ref={localContainer} className='local-container'></div>
+          </>
         )}
+        <p>Remote User</p>
         <div ref={remoteContainer} className='remote-container'></div>
       </div>
     </>

@@ -1,0 +1,11 @@
+.total-container {
+  background-color: #f2f2f2;
+  display: flex;
+  padding: auto;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  width: 30%;
+}

@@ -1,0 +1,48 @@
+/* src/components/VideoCall.css */
+
+.meeting-content {
+  width: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.video-call {
+  background-color: orange;
+  display: flex;
+  width: 100%;
+  /* height: 70vh; */
+}
+
+.local-area {
+  background-color: greenyellow;
+  width: 50%;
+  height: 50%;
+  padding: 10px;
+  margin: 10px;
+}
+.remote-area {
+  background-color: goldenrod;
+  width: 50%;
+  padding: 10px;
+  margin: 10px;
+}
+.local-container {
+  background-color: skyblue;
+  width: 100%;
+  height: 300px;
+  border: 1px solid #333;
+}
+
+.remote-container {
+  background-color: skyblue;
+  width: 100%;
+  height: 300px;
+  border: 2px solid #333;
+}
+
+.remote-player {
+  width: 400px;
+  height: 300px;
+  margin: 10px;
+  border: 2px solid #ccc;
+}

@@ -1,0 +1,53 @@
+/* Timer 컴포넌트 스타일 */
+.timer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1000px;
+  margin: auto;
+}
+
+.timer-display {
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  /* transition: width 1s linear; */
+}
+
+/* 모달 CSS */
+.timeupModal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 50%;
+}
+
+.Overlay {
+  background-color: #202020;
+  position: fixed; /* 화면 전체를 덮도록 설정 */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000; /* 오버레이가 다른 요소보다 위에 위치하도록 */
+}

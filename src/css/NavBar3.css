@@ -1,0 +1,30 @@
+.navigation {
+  height: 100px;
+  background-color: green;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+nav ul {
+  list-style: none;
+  padding: 10px;
+  display: flex;
+  background-color: orange;
+  flex-direction: row;
+  width: 300px;
+}
+
+nav ul li {
+  margin-right: 10px;
+  background-color: white;
+  font-size: 20px;
+}
+
+.logo {
+  background-color: aqua;
+}
+
+.button {
+  background-color: aqua;
+}

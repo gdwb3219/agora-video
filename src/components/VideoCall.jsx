@@ -111,7 +111,6 @@ function VideoCall({ isOperator }) {
 
   return (
     <>
-      <button onClick={handleLeave}>Leave</button>
       <div className="video-call">
         <div className="local-area">
           <p>Local Users</p>

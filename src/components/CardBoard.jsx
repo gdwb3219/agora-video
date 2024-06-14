@@ -68,10 +68,14 @@ function CardBoard() {
         {selectedCards.map((card, index) => (
           <li
             key={index}
-            className="card-item"
+            // className="card-item"
+            className={`card-item ${
+              revealedCards[index] ? 'revealed' : 'hidden'
+            }`}
             onClick={() => revealCard(index)}
           >
-            {revealedCards[index] ? card : '클릭하여 확인'}
+            {card}
+            {/* {revealedCards[index] ? card : '클릭하여 확인'} */}
           </li>
         ))}
       </ul>

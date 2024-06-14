@@ -19,7 +19,16 @@
   gap: 10px;
 }
 
-/* 개별 카드 스타일 */
+/* 개별 카드 스타일 (오픈) */
+.card-item.revealed {
+}
+
+/* 개별 카드 스타일 (숨김) */
+.card-item.hidden {
+  filter: blur(3px);
+  background-color: #202020;
+}
+
 .card-item {
   background-color: #f0f0f0;
   height: 80px;
@@ -32,7 +41,7 @@
 }
 
 .card-item:hover {
-  background-color: #e0e0e0;
+  background-color: #404040;
 }
 
 /* 새로 고침 버튼 스타일 */

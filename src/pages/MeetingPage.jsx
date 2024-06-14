@@ -24,7 +24,7 @@ function MeetingPage() {
       <div className="total-container">
         <div className="meeting-content">
           <VideoCall isOperator={isOperator} />
-          <Timer initialTime={10} />
+          <Timer initialTime={1000} />
         </div>
         <div className="card-content">
           <CardBoard />

@@ -75,10 +75,12 @@ function Timer({ initialTime }) {
         className="timeupModal"
         overlayClassName="Overlay"
       >
-        <h2>서로의 얼굴이 궁금하다면</h2>
-        <h2>필터 해제에 동의 해주세요</h2>
+        <h3>서로의 얼굴이 궁금하다면</h3>
+        <h3>필터 해제에 동의 해주세요</h3>
         <p>모두 동의 시 5분의 추가 시간이 주어집니다.</p>
-        <button onClick={closeModal}>여기서 그만하기</button>
+        <button>
+          <a href="/">여기서 그만하기</a>
+        </button>
         <button onClick={closeModal}>동의하고 계속하기</button>
       </ReactModal>
     </div>

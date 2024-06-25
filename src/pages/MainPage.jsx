@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import VideoCall from '../components/VideoCall';
 import '../css/App.css';
 
 function MainPage() {

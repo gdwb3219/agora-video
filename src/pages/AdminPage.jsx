@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import VideoCall from '../components/VideoCall';
 import '../css/App.css';
+import AGRtest from '../components/AGRtest';
 
 function AdminPage() {
   const [isOperator, setIsOperator] = useState(false);
@@ -38,6 +39,7 @@ function AdminPage() {
             <VideoCall isOperator={isOperator} />
           )}
         </header>
+        <AGRtest />
       </div>
     </>
   );

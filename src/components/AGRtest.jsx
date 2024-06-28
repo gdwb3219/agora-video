@@ -7,7 +7,7 @@ const licenseKey =
   "21d20fe4ed7aa4bb19a8b9b7ec19f9d7cff4ddf90d05a2f45c2f47c09f8dc2a02ba8eac09adfe2dc";
 const appId = "4dc42fcbafad47ad9ae33c9879a5db6c";
 const token =
-  "007eJxTYHAPTeTsLMuWlTb90fKxe6vD7JT+tT+uHfXPNm2avJqvWV2BwSQl2cQoLTkpMS0xxcQ8McUyMdXYONnSwtwy0TQlySy5O7M2rSGQkeEqSw8DIxSC+CwMuYmZeQwMAEOyH7M=";
+  "007eJxTYAg42yIieq1OLOKHyLO/d7ok1TRz0xtW5qdknE6b9GLDenkFBpOUZBOjtOSkxLTEFBPzxBTLxFRj42RLC3PLRNOUJLNkllN1aQ2BjAy55/oYGRkgEMRnYchNzMxjYAAAgEMgng==";
 const channel = "main";
 
 const effectList = [
@@ -38,7 +38,7 @@ function AGRtest() {
   // const localUIDref = useRef();
   const remoteStream = useRef();
   const remoteStreamsRef = useRef([]);
-  const DeepARRef = useRef(null);
+  const DeepARRef = useRef();
 
   // deep AR 초기화
   const [deepAR, setDeepAR] = useState(null);
@@ -49,39 +49,37 @@ function AGRtest() {
   // ******************************************************
   // state 관리
   // ******************************************************
-  const [agoraEngine, setAgoraEngine] = useState(
-    new AgoraRTC.createClient({ mode: "rtc", codec: "vp9" })
+  const agoraEngineRef = useRef(
+    AgoraRTC.createClient({ mode: "rtc", codec: "vp9" })
   );
+
+  const agoraEngine = agoraEngineRef.current;
+
   const [remoteStreams, setRemoteStreams] = useState({});
-  const [mainStreamId, setMainStreamId] = useState();
-  const [deepARstate, setDeepARstate] = useState();
-
-  // ******************************************************
-  // const [localUID, setLocalUID] = useState("");
-
-  // const [remoteAudioTrack, setRemoteAudioTrack] = useState();
-  // const [remoteVideoTrack, setRemoteVideoTrack] = useState();
-  const [remoteId, setRemoteId] = useState();
 
   // Deep AR 시작
   const deepARInit = async () => {
     console.log("444.===deepARInit 함수 실행");
+    console.log(previewElementRef.current, "4-0.===Ref가 있는지 확인!!!");
+    if (previewElementRef.current === null) {
+      console.log("4-0.===Ref가 없어서 초기화 실패!!!");
+      return;
+    }
     try {
       console.log("4-1.===Try문 실행됨");
-      const deepAREngine = await deepar.initialize({
+      DeepARRef.current = await deepar.initialize({
         licenseKey: licenseKey,
         // 아래 요소는 canvas 또는 video 태그일 것
-        // previewElement: document.querySelector('#deepar-screen'),
         previewElement: previewElementRef.current,
+        // previewElement:  undefined,
         effect: effectList[13],
         // rootPath: "/deepar-resources",
       });
+
       console.log("4-2.===deepar 초기화 완료!!!");
 
       // setDeepARstate(deepAREngine);
-      DeepARRef.current = deepAREngine;
-      console.log(DeepARRef.current, "4-3.=== Ref에 deepar 참조");
-      return deepAREngine;
+      return DeepARRef.current;
     } catch (error) {
       console.error("Failed to init Deep AR", error);
       // document.getElementById('loading-screen').style.display = 'none';
@@ -94,10 +92,6 @@ function AGRtest() {
   // 비동기 함수 호출을 위한 useEffect 문
   useEffect(() => {
     // console.log("deepAREnginedeepAREnginedeepAREngine", deepAREngine);
-    const joinStream = async () => {
-      console.log("111.===Join Stream 시작");
-      await joinAndDisplayLocalStream();
-    };
 
     const handleUserJoined = async (user, mediaType) => {
       console.log("10.=== User Joined 이벤트 발생!");
@@ -119,26 +113,27 @@ function AGRtest() {
 
       if (mediaType === "video") {
         console.log("14-1.=== user의 mediaType이 video 타입 인것으로 확인!");
+        agoraEngine.setRemoteVideoStreamType(user.uid, 1);
+        const remoteVideoTrack = user.videoTrack;
+        const remotePlayerContainer = document.createElement("div");
+        console.log("15.=== remote Player Container 생성!");
+        remotePlayerContainer.id = user.uid.toString();
+        remotePlayerContainer.textContent =
+          "Remote user " + user.uid.toString();
+        remotePlayerContainer.style.width = "640px";
+        remotePlayerContainer.style.height = "480px";
+        document.body.append(remotePlayerContainer);
+        console.log("16.=== document에 태그 객체 append 완료!!!");
+        console.log("17.=== 후후후 play 전");
+        remoteVideoTrack.play(remotePlayerContainer);
+        console.log("18.=== 후후후 play 후");
       } else if (mediaType === "audio") {
         console.log("14-2.=== user의 mediaType이 audio 타입 인것으로 확인!");
+        const remoteAudioTrack = user.audioTrack;
+        remoteAudioTrack.play();
       } else {
         console.log("14-3.=== user의 mediaType이 미확인!");
       }
-
-      const remoteAudioTrack = user.audioTrack;
-      const remoteVideoTrack = user.videoTrack;
-      const remotePlayerContainer = document.createElement("div");
-      console.log("15.=== remote Player Container 생성!");
-      remotePlayerContainer.id = user.uid.toString();
-      remotePlayerContainer.textContent = "Remote user " + user.uid.toString();
-      remotePlayerContainer.style.width = "640px";
-      remotePlayerContainer.style.height = "480px";
-      document.body.append(remotePlayerContainer);
-      console.log("16.=== document에 태그 객체 append 완료!!!");
-
-      console.log("17.=== 후후후 play 전");
-      remoteVideoTrack.play(remotePlayerContainer);
-      console.log("18.=== 후후후 play 후");
     };
 
     // **************************************************
@@ -162,7 +157,6 @@ function AGRtest() {
     const joinAndDisplayLocalStream = async () => {
       const deepAREngine = await deepARInit();
       console.log(typeof deepAREngine, "666.=== deepAREngine 생성");
-      console.log(deepAREngine, "777.=== type 확인");
 
       agoraEngine.on("user-joined", handleJoined);
       agoraEngine.on("user-published", handleUserJoined);
@@ -172,14 +166,7 @@ function AGRtest() {
       // --------------------------------------------------------------
       // 6/25 state 리렌더링 방지
       // --------------------------------------------------------------
-      const localUID = await agoraEngine.join(appId, channel, token);
-      // setLocalUID(localUID);
-      // --------------------------------------------------------------
-      // --------------------------------------------------------------
-      // ref 테스트
-      // --------------------------------------------------------------
-      // localUIDref.current = localUID;
-      console.log(localUID, "333.===localUIDlocalUID, 로컬 아이디 등록!!!");
+
       // console.log(localUIDref.current, "444.===REF 값이 뭐냐");
       // console.log(DeepARRef.current, "555.=== 왜 없는데");
 
@@ -201,12 +188,12 @@ function AGRtest() {
       // --------------------------------------------------------------
 
       const canvas = await deepAREngine.getCanvas();
-      console.log(localUID, "3-1.=== deepAREnging.getCanvas()실행!!!");
+      console.log("3-1.=== deepAREnging.getCanvas()실행!!!");
       const outputStream = canvas.captureStream(30);
       const videoTrack = outputStream.getVideoTracks()[0];
-      console.log(localUID, "3-1-1.===agora 실행 전");
+      console.log("3-1-1.===agora 실행 전");
       const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-      console.log(localUID, "3-1-2.===agora 실행 후, 커스텀 실행 전");
+      console.log("3-1-2.===agora 실행 후, 커스텀 실행 전");
       const localVideoTrack = await AgoraRTC.createCustomVideoTrack({
         mediaStreamTrack: videoTrack,
       });
@@ -216,6 +203,15 @@ function AGRtest() {
         "3-2.=== deep 적용 로컬 트랙 생성!!!"
       );
 
+      const localUID = await agoraEngine.join(appId, channel, token);
+      // setLocalUID(localUID);
+      // --------------------------------------------------------------
+      // --------------------------------------------------------------
+      // ref 테스트
+      // --------------------------------------------------------------
+      // localUIDref.current = localUID;
+      console.log(localUID, "333.===localUIDlocalUID, 로컬 아이디 등록!!!");
+
       await agoraEngine.publish([localVideoTrack, localAudioTrack]);
       console.log("888.=== agora Publish 완료");
 
@@ -224,6 +220,11 @@ function AGRtest() {
 
       // 내꺼 기준 트랙을 방송 시작!
       // await agoraEngine.publish([localTracks[0], localTracks[1]]);
+    };
+
+    const joinStream = async () => {
+      console.log("111.===Join Stream 시작");
+      await joinAndDisplayLocalStream();
     };
 
     joinStream();

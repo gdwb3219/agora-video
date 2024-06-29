@@ -5,8 +5,6 @@ function NavBar() {
   return (
     <div className="navbar">
       <div className="nav-header">
-        <button className="nav-button">내 프로필</button>
-
         <div className="logo-container">
           <a href="/" className="logo">
             MonstAR 로고

@@ -26,7 +26,7 @@ function MeetingPage({ isOperator }) {
         <div className="meeting-content">
           {/* <VideoCall /> */}
           <MonstVideo isOperator={isOperator} />
-          <Timer initialTime={1000} />
+          <Timer />
         </div>
         <div className="card-content">
           <CardBoard />

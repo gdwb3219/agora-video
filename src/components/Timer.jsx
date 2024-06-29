@@ -7,11 +7,29 @@ import axios from 'axios';
 ReactModal.setAppElement('#root');
 
 function Timer({ initialTime }) {
-  const [timeLeft, setTimeLeft] = useState(initialTime); // 초기 시간 설정
+  // const initialTime = axios
+  //   .get('api/timer/time_left')
+  //   .then((res) => {
+  //     console.log(res.data.timer, 'Timer 숫자');
+  //   })
+  //   .catch((error) => {
+  //     console.error('Timer 이상', error);
+  //   });
+  const [timeLeft, setTimeLeft] = useState(10); // 초기 시간 설정
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
+    async function initialTime() {
+      try {
+        const response = await axios.get('api/timer/time_left');
+        setTimeLeft(Math.floor(response.data.timer));
+      } catch (error) {
+        console.error('Timer이상', error);
+      }
+    }
+
+    initialTime();
     // timer 서버 연동
     // axios
     //   .get(
@@ -65,10 +83,11 @@ function Timer({ initialTime }) {
   };
 
   const handleTimeLeft = () => {
+    console.log('함수 실행 완료!');
     axios
-      .get('api/timer/time_left/')
+      .get('api/timer/time_left')
       .then((res) => {
-        console.log(res.data.timer);
+        console.log(res.data);
       })
       .catch((error) => {
         console.error('Timer 이상', error);

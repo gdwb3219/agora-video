@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../css/Timer.css';
 import ReactModal from 'react-modal';
+import axios from 'axios';
 
 // 모달의 루트 엘리먼트를 설정
 ReactModal.setAppElement('#root');
@@ -11,6 +12,19 @@ function Timer({ initialTime }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
+    // timer 서버 연동
+    // axios
+    //   .get(
+    //     'http://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com/timer/time_left'
+    //   )
+    //   .then((res) => {
+    //     console.log(res.data, 'Timer 몇 초남?');
+    //     setTimeLeft(res.data);
+    //   })
+    //   .catch((error) => {
+    //     console.error('Timer 이상', error);
+    //   });
+
     if (timeLeft <= 0) {
       setIsModalOpen(true); // 타이머가 종료되면 모달을 열기
       return;
@@ -50,6 +64,17 @@ function Timer({ initialTime }) {
     setIsModalOpen(false); // 모달 닫기
   };
 
+  const handleTimeLeft = () => {
+    axios
+      .get('api/timer/time_left/')
+      .then((res) => {
+        console.log(res.data.timer);
+      })
+      .catch((error) => {
+        console.error('Timer 이상', error);
+      });
+  };
+
   return (
     <div className="timer-container">
       <div className="timer-display" style={{ color: getBarColor(progress) }}>
@@ -65,6 +90,7 @@ function Timer({ initialTime }) {
         ></div>
       </div>
       <p>{timeLeft > 0 ? '시간이 줄어들고 있어요!' : '시간이 다 되었어요!'}</p>
+      <button onClick={handleTimeLeft}>버튼</button>
 
       {/* 모달 창 */}
       <ReactModal

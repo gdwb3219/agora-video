@@ -4,6 +4,10 @@
   padding: auto;
 }
 
+.meeting-content {
+  width: 70%;
+}
+
 .card-content {
   display: flex;
   flex-direction: column;

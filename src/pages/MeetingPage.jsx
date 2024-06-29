@@ -6,11 +6,12 @@ import '../css/App.css';
 import '../css/MeetingPage.css';
 import Timer from '../components/Timer';
 import CardBoard from '../components/CardBoard';
+import MonstVideo from '../components/MonstVideo';
 
-function MeetingPage() {
+function MeetingPage({ isOperator }) {
   let location = useLocation();
   const { isAdmin } = location.state || {};
-  const [isOperator, setIsOperator] = useState(isAdmin);
+  // const [isOperator, setIsOperator] = useState(isAdmin);
   const [inCall, setInCall] = useState(false);
   console.log('관리자냐?', isOperator);
 
@@ -23,7 +24,8 @@ function MeetingPage() {
       <NavBar />
       <div className="total-container">
         <div className="meeting-content">
-          <VideoCall isOperator={isOperator} />
+          {/* <VideoCall /> */}
+          <MonstVideo isOperator={isOperator} />
           <Timer initialTime={1000} />
         </div>
         <div className="card-content">

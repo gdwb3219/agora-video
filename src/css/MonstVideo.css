@@ -1,0 +1,15 @@
+#Videos-Container {
+  width: 100%;
+  height: 500px;
+  display: flex;
+}
+
+#local-video {
+  width: 50%;
+  height: 480px;
+}
+
+#remote-video {
+  width: 50%;
+  height: 480px;
+}

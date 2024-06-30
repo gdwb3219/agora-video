@@ -11,7 +11,7 @@ import MonstVideo from '../components/MonstVideo';
 function MeetingPage({ isOperator }) {
   let location = useLocation();
   const { isAdmin } = location.state || {};
-  // const [isOperator, setIsOperator] = useState(isAdmin);
+  // const [isAdmin, setIsOperator] = useState(isOperator);
   const [inCall, setInCall] = useState(false);
   console.log('관리자냐?', isOperator);
 
@@ -24,7 +24,6 @@ function MeetingPage({ isOperator }) {
       <NavBar />
       <div className="total-container">
         <div className="meeting-content">
-          {/* <VideoCall /> */}
           <MonstVideo isOperator={isOperator} />
           <Timer />
         </div>

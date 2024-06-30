@@ -15,7 +15,7 @@ function Timer({ initialTime }) {
   //   .catch((error) => {
   //     console.error('Timer 이상', error);
   //   });
-  const [timeLeft, setTimeLeft] = useState(10); // 초기 시간 설정
+  const [timeLeft, setTimeLeft] = useState(600); // 초기 시간 설정
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -46,7 +46,8 @@ function Timer({ initialTime }) {
     if (timeLeft <= 0) {
       setIsModalOpen(true); // 타이머가 종료되면 모달을 열기
       return;
-    } // 시간이 다 소진되면 타이머 중지
+      // 시간이 다 소진되면 타이머 중지
+    }
 
     const interval = setInterval(() => {
       setTimeLeft((prevTime) => prevTime - 1); // 1초마다 시간 감소

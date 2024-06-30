@@ -7,7 +7,7 @@ const licenseKey =
   '21d20fe4ed7aa4bb19a8b9b7ec19f9d7cff4ddf90d05a2f45c2f47c09f8dc2a02ba8eac09adfe2dc';
 const appId = '4dc42fcbafad47ad9ae33c9879a5db6c';
 const token =
-  '007eJxTYAg42yIieq1OLOKHyLO/d7ok1TRz0xtW5qdknE6b9GLDenkFBpOUZBOjtOSkxLTEFBPzxBTLxFRj42RLC3PLRNOUJLNkllN1aQ2BjAy55/oYGRkgEMRnYchNzMxjYAAAgEMgng==';
+  '007eJxTYJgg/uOav1fdeclVv6Ylvqq791vQU3mBgJi2qsrBmgWTju1VYDBJSTYxSktOSkxLTDExT0yxTEw1Nk62tDC3TDRNSTJLfh/RmNYQyMgQ9W0ZEyMDBIL4LAy5iZl5DAwAv1shlw==';
 const channel = 'main';
 
 const effectList = [

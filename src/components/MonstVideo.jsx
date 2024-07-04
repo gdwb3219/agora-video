@@ -8,7 +8,7 @@ const licenseKey =
   "21d20fe4ed7aa4bb19a8b9b7ec19f9d7cff4ddf90d05a2f45c2f47c09f8dc2a02ba8eac09adfe2dc";
 const appId = "4dc42fcbafad47ad9ae33c9879a5db6c";
 const token =
-  "007eJxTYHiRufa634T+q18kn9174CWoHRXP9H6T02IHo4150kdOuqQqMJikJJsYpSUnJaYlppiYJ6ZYJqYaGydbWphbJpqmJJkl87K3pDUEMjLIujxmYmSAQBCfhSE3MTOPgQEAvqMgLQ==";
+  "007eJxTYPg1Me7hjLlySzY6iD/Vbqs68/AVF5N/3MurvW/X6VY+25mlwGCSkmxilJaclJiWmGJinphimZhqbJxsaWFumWiakmSWLNHWltYQyMhQc3wJCyMDBIL4LAy5iZl5DAwAMXwiqw==";
 const channel = "main";
 
 const effectList = [

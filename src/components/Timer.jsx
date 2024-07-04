@@ -17,7 +17,7 @@ function Timer({ isAdmin }) {
   //   });
   const [seconds, setSeconds] = useState(600);
   const [inputSecond, setInputSecond] = useState(600); // 입력 초기값
-  const [timeLeft, setTimeLeft] = useState(); // 초기 시간 설정
+  const [timeLeft, setTimeLeft] = useState(600); // 초기 시간 설정
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
   const [isRunning, setIsRunning] = useState(false); // 진행 중 여부
   const initTimeRef = useRef(null);
@@ -148,10 +148,21 @@ function Timer({ isAdmin }) {
     // setTimeLeft(newTime);
   };
 
+  // 타이머 메시지 함수
+  const renderMessage = () => {
+    if (isRunning && timeLeft > 0) {
+      return "시간이 가고 있어요!";
+    } else if (!isRunning && timeLeft > 0) {
+      return "시작하기 전이에요!";
+    } else {
+      return "시간이 끝났어요!";
+    }
+  };
+
   return (
     <div className='timer-container'>
       <div className='timer-display' style={{ color: getBarColor(progress) }}>
-        {formatTime(timeLeft)}
+        {isRunning ? formatTime(timeLeft) : formatTime(600)}
       </div>
       <div className='progress-bar'>
         <div
@@ -162,7 +173,7 @@ function Timer({ isAdmin }) {
           }}
         ></div>
       </div>
-      <p>{timeLeft > 0 ? "시간이 줄어들고 있어요!" : "시간이 다 되었어요!"}</p>
+      <p>{renderMessage()}</p>
       <button onClick={handleTimeLeft}></button>
       {/* //*--------- 여기부터 admin 영역 *---------/ */}
       <div>

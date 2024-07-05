@@ -15,72 +15,58 @@ const formatTime = (seconds) => {
 };
 
 function Timer({ isAdmin: isOperator }) {
-  // const initialTime = axios
-  //   .get('api/timer/time_left')
-  //   .then((res) => {
-  //     console.log(res.data.timer, 'Timer 숫자');
-  //   })
-  //   .catch((error) => {
-  //     console.error('Timer 이상', error);
-  //   });
+  const [isRunning, setIsRunning] = useState(false); // 진행 중 여부
   const [seconds, setSeconds] = useState(600);
   const [inputSecond, setInputSecond] = useState(600); // 입력 초기값
-  const [timeLeft, setTimeLeft] = useState(600); // 초기 시간 설정
+  // 현재 남은 시간 확인
+  const [timeLeft, setTimeLeft] = useState("시작 전"); // 초기 시간 설정
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
-  const [isRunning, setIsRunning] = useState(false); // 진행 중 여부
   const initTimeRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // timeLeft 변경 시 실행되는 useEffect 타이머 현재 남은 시간
   useEffect(() => {
-    const fetchTimeLeft = async () => {
-      try {
-        const response = await axios.get("/timer/time_left");
-        setTimeLeft(Math.floor(response.data.timer));
-        console.log(Math.floor(response.data.timer));
-      } catch (error) {
-        console.error("Error fetching the time left:", error);
-      }
-    };
-
-    fetchTimeLeft();
-  }, [timeLeft]);
-
-  // 서버에 시간을 요청하고, 바뀔 때마다 렌더링 한다
-  // 그러니까 타이머가 실행 중일 때에만 관리
-  useEffect(() => {
-    async function initialTime() {
-      try {
-        axios.get("time_left").then((res) => {
-          const initTime = res.data.timer;
-          setTimeLeft(Math.floor(initTime));
-        });
-      } catch (error) {
-        console.error("Timer이상해해해", error);
-      }
-    }
-
-    // initialTime();
-
     if (timeLeft <= 0) {
       setIsModalOpen(true); // 타이머가 종료되면 모달을 열기
       return;
       // 시간이 다 소진되면 타이머 중지
     }
-
     setProgress((timeLeft / inputSecond) * 100);
+    const fetchTimeLeft = async () => {
+      try {
+        const response = await axios.get("/timer/time_left");
+        if (response.data.timer === "Not started") {
+          setTimeLeft(inputSecond);
+        } else {
+          setTimeLeft(Math.floor(response.data.timer));
+          console.log(Math.floor(response.data.timer), "서버 시간");
+        }
+      } catch (error) {
+        console.error("Error fetching the time left:", error);
+      }
+    };
 
-    if (isRunning === true) {
-      const interval = setInterval(() => {
-        setTimeLeft((prevTime) => prevTime - 1); // 1초마다 시간 감소
-      }, 1000);
-    }
+    console.log("Timer 시간이 몇시인가?");
+    const intervalId = setInterval(fetchTimeLeft, 1000);
 
-    // Clean up interval on component unmount
-    // return () => clearInterval(interval);
-  }, [timeLeft]);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  // 서버에 시간을 요청하고, 바뀔 때마다 렌더링 한다
+  // 그러니까 타이머가 실행 중일 때에만 관리
+  // useEffect(() => {
+  //   // if (isRunning === true) {
+  //   //   const interval = setInterval(() => {
+  //   //     setTimeLeft((prevTime) => prevTime - 1); // 1초마다 시간 감소
+  //   //   }, 1000);
+  //   // }
+  //   // Clean up interval on component unmount
+  //   // return () => clearInterval(interval);
+  // }, [timeLeft]);
 
   // 진행 바의 색깔을 비율에 따라 변경
   const getBarColor = (percentage) => {
+    if (!isRunning) return "gray";
     if (percentage > 50) return "limegreen";
     if (percentage > 20) return "orange";
     return "red";
@@ -92,20 +78,20 @@ function Timer({ isAdmin: isOperator }) {
   };
 
   // 서버 시간 가져오기 함수
-  const handleTimeLeft = () => {
-    console.log("함수 실행 완료!");
-    axios
-      .get("time_left")
-      .then((res) => {
-        console.log(res.data);
-      })
-      .catch((error) => {
-        console.error("Timer 이상해", error);
-      });
-  };
+  // const handleTimeLeft = () => {
+  //   console.log("함수 실행 완료!");
+  //   axios
+  //     .get("time_left")
+  //     .then((res) => {
+  //       console.log(res.data);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Timer 이상해", error);
+  //     });
+  // };
 
   // ------------------ 타이버 조작 버튼 (관리자) ------------------
-  const handleStart = () => {
+  const handleStart = async () => {
     if (!isRunning) {
       setIsRunning(true);
       // intervalRef.current = setInterval(() => {
@@ -120,8 +106,15 @@ function Timer({ isAdmin: isOperator }) {
       // }, 1000);
     }
     // axios로 서버에 시작 요청
+    try {
+      const response = await axios.post(`/timer/start?duration=${seconds}`);
+      console.log(response, "start 됐나?");
+    } catch (error) {
+      console.error("왜 Error가 났는 지 찾아보기");
+    }
+
     axios
-      .post(`start?duration=${seconds}`)
+      .post(`/timer/start?duration=${seconds}`)
       .then((res) => {
         console.log("Response가 왔네", res.data);
       })
@@ -147,18 +140,17 @@ function Timer({ isAdmin: isOperator }) {
     setIsRunning(false);
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     // clearInterval(intervalRef.current);
     setIsRunning(false);
     setTimeLeft(seconds);
-    axios
-      .post("reset")
-      .then((res) => {
-        console.log(res, "reset쪽 콘솔");
-      })
-      .catch((error) => {
-        console.error(error, "reset쪽 에러");
-      });
+
+    try {
+      const response = await axios.post("/timer/reset");
+      console.log(response, "Reset 완료!");
+    } catch (error) {
+      console.error("Error 났음, Reset에서");
+    }
   };
 
   const handleInputChange = (e) => {
@@ -182,7 +174,7 @@ function Timer({ isAdmin: isOperator }) {
   return (
     <div className='timer-container'>
       <div className='timer-display' style={{ color: getBarColor(progress) }}>
-        {isRunning ? formatTime(timeLeft) : formatTime(600)}
+        {isRunning ? formatTime(timeLeft) : "시작 전"}
       </div>
       <div className='progress-bar'>
         <div
@@ -194,7 +186,7 @@ function Timer({ isAdmin: isOperator }) {
         ></div>
       </div>
       <p>{renderMessage()}</p>
-      <button onClick={handleTimeLeft}></button>
+
       {/* //*--------- 여기부터 admin 영역 *---------/ */}
       <div>
         {isOperator && (

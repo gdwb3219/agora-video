@@ -140,13 +140,14 @@ function MonstVideo({ isOperator }) {
       const localVideoTrack = await AgoraRTC.createCustomVideoTrack({
         mediaStreamTrack: videoTrack,
       });
+      const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
       console.log(localVideoTrack, "12.=== deep 적용 로컬 트랙 생성!!!");
 
       const localUID = await agoraEngine.join(appId, channel, token);
 
       console.log(localUID, "13.===localUIDlocalUID, 로컬 아이디 등록!!!");
 
-      await agoraEngine.publish([localVideoTrack]);
+      await agoraEngine.publish([localVideoTrack, localAudioTrack]);
       console.log("14.=== agora Publish 완료");
     };
 

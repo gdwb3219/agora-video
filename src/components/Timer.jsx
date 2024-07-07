@@ -16,53 +16,134 @@ const formatTime = (seconds) => {
 
 function Timer({ isAdmin: isOperator }) {
   const [isRunning, setIsRunning] = useState(false); // 진행 중 여부
-  const [seconds, setSeconds] = useState(600);
   const [inputSecond, setInputSecond] = useState(600); // 입력 초기값
-  // 현재 남은 시간 확인
-  const [timeLeft, setTimeLeft] = useState("시작 전"); // 초기 시간 설정
+  // 현재 남은 시간 확인 (서버용)
+  const [timeLeft, setTimeLeft] = useState(null); // 초기 시간 설정
+  // 현재 남은 시간 확인 (리액트용)
+  const [seconds, setSeconds] = useState(600);
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
   const initTimeRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // timeLeft 변경 시 실행되는 useEffect 타이머 현재 남은 시간
-  useEffect(() => {
-    if (timeLeft <= 0) {
-      setIsModalOpen(true); // 타이머가 종료되면 모달을 열기
-      return;
-      // 시간이 다 소진되면 타이머 중지
+  // web socket 전용 state
+  const [ws, setWs] = useState(null);
+  const [wsMessage, setWsMessage] = useState([]);
+
+  console.log("Timer 컴포넌트 실행@@@@", timeLeft);
+
+  // 서버 시간을 불러와서 state에 반영하는 함수
+  const fetchTimeLeft = async () => {
+    try {
+      console.log("서버 시간 불러온ㄷ!!!");
+      const response = await axios.get("/timer/time_left");
+      if (response.data.timer === "Not started") {
+        console.log("시작 안한 상태@@@");
+        setTimeLeft(seconds);
+        setIsRunning(false);
+      } else {
+        console.log("시작 한 상태@@@");
+        setTimeLeft(Math.floor(response.data.timer));
+        setIsRunning(true);
+      }
+    } catch (error) {
+      console.error("Error fetching the time left:", error);
     }
-    setProgress((timeLeft / inputSecond) * 100);
-    const fetchTimeLeft = async () => {
-      try {
-        const response = await axios.get("/timer/time_left");
-        if (response.data.timer === "Not started") {
-          setTimeLeft(inputSecond);
-        } else {
-          setTimeLeft(Math.floor(response.data.timer));
-          console.log(Math.floor(response.data.timer), "서버 시간");
-        }
-      } catch (error) {
-        console.error("Error fetching the time left:", error);
+  };
+
+  // ------------------------ web Socket 로컬 호스트 테스트 ----------------
+  // local 8000 ws 간이 테스트
+  useEffect(() => {
+    console.log("wsMessage", wsMessage);
+    const ws = new WebSocket("ws://localhost:8000/ws/timer_10min");
+    setWs(ws);
+
+    // 웹소켓 이벤트 핸들러 (메시지 받는 경우)
+    ws.onmessage = (event) => {
+      console.log("Message 받았음 핸들러!!!");
+      const newMessage = event.data;
+      setWsMessage((prevMessages) => [...prevMessages, newMessage]);
+      if (event.data === "start") {
+        console.log("정상 시작!", event.data);
+        setIsRunning(true);
+      } else if (event.data === "reset") {
+        console.log("정상 리셋!", event.data);
+      } else {
+        console.log("정상 else!", event.data);
       }
     };
 
-    console.log("Timer 시간이 몇시인가?");
-    const intervalId = setInterval(fetchTimeLeft, 1000);
+    // WebSocket 연결이 열렸을 때 실행될 이벤트 핸들러 설정
+    ws.onopen = () => {
+      console.log("WebSocket connection opened");
+    };
+    return () => {
+      ws.close();
+    };
+  }, [wsMessage]);
 
-    return () => clearInterval(intervalId);
-  }, []);
+  // ------------------------ web Socket 로컬 호스트 테스트 ----------------
 
-  // 서버에 시간을 요청하고, 바뀔 때마다 렌더링 한다
-  // 그러니까 타이머가 실행 중일 때에만 관리
-  // useEffect(() => {
-  //   // if (isRunning === true) {
-  //   //   const interval = setInterval(() => {
-  //   //     setTimeLeft((prevTime) => prevTime - 1); // 1초마다 시간 감소
-  //   //   }, 1000);
-  //   // }
-  //   // Clean up interval on component unmount
-  //   // return () => clearInterval(interval);
-  // }, [timeLeft]);
+  // useEffect 서버 시간
+  // client 상태 바뀔 때마다 변경 요청
+  useEffect(() => {
+    console.log("서버용 시간 확인");
+    fetchTimeLeft();
+    console.log("@@@@@", timeLeft, isRunning);
+    // 처음 실행 시, 러닝 중이면(타이머 동작 중에 새로고침) 실행
+    // if (isRunning === true) {
+    //   console.log("새로고침 안했고, run상태 True로 바뀜");
+
+    //   fetchTimeLeft();
+    // } else {
+    //   // 초기 실행 시, isRunning false인 경우, 서버에 요청해서 실행 중인지
+    //   // 확인 여부에 따라 isRUnning 변경
+    //   const fetchIsRunning = async () => {
+    //     try {
+    //       // 일단 서버에 요청할껀데, 서버가 false 면 냅두고,
+    //       // 서버가 러닝 중이면 state를 true로 변경
+    //       const response = await axios.get("/timer/time_left");
+    //       if (response.data.timer === "Not started") {
+    //         // client False, 서버 False
+    //         console.log("새로고침/Reset했고, 시작 안한 상태");
+    //       } else {
+    //         // client False, 서버가 True 상태인 경우
+    //         console.log("새로고침 했고, 시작한 상태");
+    //         setIsRunning(true);
+    //         fetchTimeLeft();
+    //       }
+    //     } catch (error) {
+    //       console.error("fetchIsRunning에서 에러");
+    //     }
+    //   };
+    //   fetchIsRunning();
+    // }
+  }, [isRunning]);
+
+  // -----------------------------------------------------
+  // timeLeft 변경 시 실행되는 useEffect 타이머 현재 남은 시간
+  useEffect(() => {
+    console.log("!@#", timeLeft, seconds);
+    if (timeLeft == false || timeLeft == null) {
+      console.log("timeLeft가 없는 듯?", timeLeft);
+    } else if (timeLeft <= 0) {
+      console.log("timeLeft가 0이어서 모달을 연다", timeLeft);
+      setIsModalOpen(true); // 타이머가 종료되면 모달을 열기
+      return;
+      // 시간이 다 소진되면 타이머 중지
+    } else {
+      console.log("??ㅋㅋ실행 중");
+      const intervalId = setInterval(() => {
+        setSeconds((prevTime) => {
+          if (prevTime <= 1) {
+            clearInterval(intervalId);
+            setIsRunning(false);
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+    }
+  }, [timeLeft]);
 
   // 진행 바의 색깔을 비율에 따라 변경
   const getBarColor = (percentage) => {
@@ -77,50 +158,29 @@ function Timer({ isAdmin: isOperator }) {
     setIsModalOpen(false); // 모달 닫기
   };
 
-  // 서버 시간 가져오기 함수
-  // const handleTimeLeft = () => {
-  //   console.log("함수 실행 완료!");
-  //   axios
-  //     .get("time_left")
-  //     .then((res) => {
-  //       console.log(res.data);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Timer 이상해", error);
-  //     });
-  // };
-
   // ------------------ 타이버 조작 버튼 (관리자) ------------------
   const handleStart = async () => {
     if (!isRunning) {
       setIsRunning(true);
-      // intervalRef.current = setInterval(() => {
-      //   setTimeLeft((prevTime) => {
-      //     if (prevTime <= 1) {
-      //       clearInterval(intervalRef.current);
-      //       setIsRunning(false);
-      //       return 0;
-      //     }
-      //     return prevTime - 1;
-      //   });
-      // }, 1000);
+      console.log("Running 상태로 변경 : True");
     }
     // axios로 서버에 시작 요청
     try {
-      const response = await axios.post(`/timer/start?duration=${seconds}`);
-      console.log(response, "start 됐나?");
+      const response = await axios.post(`/timer/start?duration=${inputSecond}`);
+      console.log(response, "서버 시간 start 됐다?");
+      ws.send("start");
     } catch (error) {
       console.error("왜 Error가 났는 지 찾아보기");
     }
 
-    axios
-      .post(`/timer/start?duration=${seconds}`)
-      .then((res) => {
-        console.log("Response가 왔네", res.data);
-      })
-      .catch((error) => {
-        console.error("POST Error", error);
-      });
+    // axios
+    //   .post(`/timer/start?duration=${seconds}`)
+    //   .then((res) => {
+    //     console.log("Response가 왔네", res.data);
+    //   })
+    //   .catch((error) => {
+    //     console.error("POST Error", error);
+    //   });
 
     // axios
     //   .post('start', seconds, {
@@ -136,18 +196,16 @@ function Timer({ isAdmin: isOperator }) {
     //   });
   };
   const handleStop = () => {
-    // clearInterval(intervalRef.current);
     setIsRunning(false);
   };
 
   const handleReset = async () => {
-    // clearInterval(intervalRef.current);
     setIsRunning(false);
-    setTimeLeft(seconds);
 
     try {
       const response = await axios.post("/timer/reset");
       console.log(response, "Reset 완료!");
+      ws.send("reset");
     } catch (error) {
       console.error("Error 났음, Reset에서");
     }
@@ -171,10 +229,19 @@ function Timer({ isAdmin: isOperator }) {
     }
   };
 
+  const handleMessage = () => {
+    if (ws) {
+      ws.send("후후후 express 서버 연결 성공");
+      console.log("메시지 보냈음!!!");
+    } else {
+      console.log("WS가 연결이 안되어서 못보냄");
+    }
+  };
+
   return (
     <div className='timer-container'>
       <div className='timer-display' style={{ color: getBarColor(progress) }}>
-        {isRunning ? formatTime(timeLeft) : "시작 전"}
+        {isRunning ? formatTime(seconds) : "시작 전"}
       </div>
       <div className='progress-bar'>
         <div
@@ -197,7 +264,7 @@ function Timer({ isAdmin: isOperator }) {
             disabled={isRunning}
           />
         )}
-        <div>Time Left: {timeLeft} seconds</div>
+        <div>Time Left: {seconds} seconds</div>
         {isOperator && (
           <>
             <button onClick={handleStart} disabled={isRunning}>
@@ -207,6 +274,7 @@ function Timer({ isAdmin: isOperator }) {
               Stop
             </button>
             <button onClick={handleReset}>Reset</button>
+            <button onClick={handleMessage}>Websocket으로 메시지 보내기</button>
           </>
         )}
       </div>

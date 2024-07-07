@@ -5,9 +5,9 @@ import "../css/AGRtest.css";
 
 const licenseKey =
   "21d20fe4ed7aa4bb19a8b9b7ec19f9d7cff4ddf90d05a2f45c2f47c09f8dc2a02ba8eac09adfe2dc";
-const appId = "4dc42fcbafad47ad9ae33c9879a5db6c";
+const appId = "5a11237b69e2452cb234a5583b8d08ff";
 const token =
-  "007eJxTYHiRufa634T+q18kn9174CWoHRXP9H6T02IHo4150kdOuqQqMJikJJsYpSUnJaYlppiYJ6ZYJqYaGydbWphbJpqmJJkl87K3pDUEMjLIujxmYmSAQBCfhSE3MTOPgQEAvqMgLQ==";
+  "007eJxTYBD/eleyei+vYnpLaZaUhQfTi2Nhm6arfvG/8nNKQ82l5AYFBtNEQ0MjY/MkM8tUIxNTo+QkI2OTRFNTC+MkixQDi7S0k9O60hoCGRnUWHVYGBkgEMRnYchNzMxjYAAADZ0eLg==";
 const channel = "main";
 
 const effectList = [
@@ -183,18 +183,18 @@ function AGRtest() {
 
   return (
     <>
-      <div className='test'>hi</div>
-      <div className='video-container'>
+      <div className="test">hi</div>
+      <div className="video-container">
         <div
           ref={previewElementRef}
-          id='local-video-456'
+          id="local-video-456"
           style={{ width: "640px", height: "480px" }}
         >
           local
         </div>
         <div
           ref={remoteElementRef}
-          id='remote-video-123'
+          id="remote-video-123"
           style={{ width: "320px", height: "240px" }}
         >
           remote

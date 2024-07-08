@@ -1,17 +1,19 @@
 // Prod 버전 Video 구현 정리
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as deepar from "deepar";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import "../css/MonstVideo.css";
 
 const licenseKey =
-  "21d20fe4ed7aa4bb19a8b9b7ec19f9d7cff4ddf90d05a2f45c2f47c09f8dc2a02ba8eac09adfe2dc";
-const appId = "4dc42fcbafad47ad9ae33c9879a5db6c";
+  "440ab2cf3bcab8d1e3166d945cc8e899bc345cc76e1855186f50b8fd013bc3566e3ab6c7b4ed75a0";
+const appId = "5a11237b69e2452cb234a5583b8d08ff";
 const token =
-  "007eJxTYKhatUTUhFXolGSW4Ovn07a6pJaxsveI7Y5gdmVqvdt9drcCg0lKsolRWnJSYlpiiol5YoplYqqxcbKlhbllomlKklnygtldaQ2BjAxrExtZGBkgEMRnYchNzMxjYAAAwroeeA==";
+  "007eJxTYBD/eleyei+vYnpLaZaUhQfTi2Nhm6arfvG/8nNKQ82l5AYFBtNEQ0MjY/MkM8tUIxNTo+QkI2OTRFNTC+MkixQDi7S0k9O60hoCGRnUWHVYGBkgEMRnYchNzMxjYAAADZ0eLg==";
 const channel = "main";
 
 const effectList = [
+  "effects/Bomb.deepar",
+  "effects/three-eye-monster.deepar",
   "effects/ray-ban-wayfarer.deepar",
   "effects/viking_helmet.deepar",
   "effects/MakeupLook.deepar",
@@ -33,14 +35,15 @@ function MonstVideo({ isOperator }) {
   // Log the version. Just in case.
   console.log("Deepar version: " + deepar.version);
   console.log("Agora version: " + AgoraRTC.VERSION);
-
+  const [filterIndex, setFilterIndex] = useState(0);
+  const [isSwitchingEffect, setIsSwitchingEffect] = useState(false);
   // UseRef
   const localElementRef = useRef(null);
   const remoteElementRef = useRef(null);
   const agoraEngineRef = useRef(
     AgoraRTC.createClient({ mode: "rtc", codec: "vp9" })
   );
-  const DeepARRef = useRef();
+  const DeepARRef = useRef(null);
 
   const agoraEngine = agoraEngineRef.current;
 
@@ -49,23 +52,24 @@ function MonstVideo({ isOperator }) {
     console.log("222.===deepARInit 함수 실행");
     console.log(localElementRef.current, "333.===Ref가 있는지 확인!!!");
     console.log("444.=== 와드");
-
-    try {
-      console.log("555.===Try문 실행됨");
-      DeepARRef.current = await deepar.initialize({
-        licenseKey: licenseKey,
-        // 아래 요소는 canvas 또는 video 태그일 것
-        previewElement: localElementRef.current,
-        effect: effectList[13],
-        // rootPath: "/deepar-resources",
-      });
-
-      console.log("666.===deepar 초기화 완료!!!");
-
+    if (!DeepARRef.current) {
+      try {
+        console.log("555.===Try문 실행됨");
+        DeepARRef.current = await deepar.initialize({
+          licenseKey: licenseKey,
+          // 아래 요소는 canvas 또는 video 태그일 것
+          previewElement: localElementRef.current,
+          effect: effectList[filterIndex],
+          // rootPath: "/deepar-resources",
+        });
+        console.log("666.===deepar 초기화 완료!!!");
+        return DeepARRef.current;
+      } catch (error) {
+        console.error("Failed to init Deep AR", error);
+      }
+    } else {
+      console.log("DeepAR is already initialized.");
       return DeepARRef.current;
-    } catch (error) {
-      console.error("Failed to init Deep AR", error);
-      return;
     }
   };
 
@@ -170,7 +174,25 @@ function MonstVideo({ isOperator }) {
     return () => {
       agoraEngine.leave();
     };
-  }, [isOperator]);
+  }, [isOperator, filterIndex]);
+
+  const changeFilter = async () => {
+    if (DeepARRef.current && !isSwitchingEffect) {
+      setIsSwitchingEffect(true);
+      try {
+        const newIndex = (filterIndex + 1) % effectList.length;
+        // 기존 필터를 유지하며 새로운 필터를 비동기적으로 적용
+        await DeepARRef.current.switchEffect(effectList[newIndex], {
+          replaceCurrent: true,
+        });
+        setFilterIndex(newIndex);
+      } catch (error) {
+        console.error("Failed to switch effect", error);
+      } finally {
+        setIsSwitchingEffect(false);
+      }
+    }
+  };
 
   return (
     <>
@@ -181,6 +203,13 @@ function MonstVideo({ isOperator }) {
           ref={remoteElementRef}
           className='video-box'
         ></div>
+        <button
+          id='change-filter-button'
+          onClick={changeFilter}
+          disabled={isSwitchingEffect}
+        >
+          Change Filter
+        </button>
       </div>
     </>
   );

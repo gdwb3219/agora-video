@@ -15,7 +15,7 @@ const formatTime = (seconds) => {
   return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 };
 
-function Timer({ isAdmin: isOperator }) {
+function Timer2({ isAdmin: isOperator }) {
   const [isRunning, setIsRunning] = useState(false); // 진행 중 여부
   const [inputSecond, setInputSecond] = useState(600); // 입력 초기값
   // 현재 남은 시간 확인 (서버용)
@@ -40,11 +40,11 @@ function Timer({ isAdmin: isOperator }) {
       const timer = response.data.timer;
       console.log(timer.is_running, timer.time_left, "response Data");
       setIsRunning(timer.is_running);
-      setTimeLeft(timer.is_running ? Math.floor(timer.time_left) : 20);
+      setTimeLeft(timer.is_running ? Math.floor(timer.time_left) : 10);
       console.log("---타이머 왜 안돼", isRunning, Math.floor(timer.time_left));
       if (timer.is_running) {
         console.log("타이머 실행 시작");
-        startTimer();
+        startTimer(Math.floor(timer.time_left));
       }
     } catch (error) {
       console.error("Error fetching the time left:", error);
@@ -52,10 +52,11 @@ function Timer({ isAdmin: isOperator }) {
   };
 
   // 이전 타이머를 받아와서 1초씩 카운트다운 하는 함수
-  const startTimer = () => {
+  const startTimer = (initialSeconds) => {
     clearInterval(timerRef.current); // 이전 타이머가 있으면 정리
     timerRef.current = setInterval(() => {
       setTimeLeft((prevSeconds) => {
+        console.log("타이머 실행 중", prevSeconds);
         if (prevSeconds <= 1) {
           clearInterval(timerRef.current);
           setIsModalOpen(true);
@@ -78,16 +79,15 @@ function Timer({ isAdmin: isOperator }) {
       const newMessage = event.data;
       setWsMessage((prevMessages) => [...prevMessages, newMessage]);
       if (event.data === "start") {
-        console.log("정상 시작!", event.data, timeLeft);
+        console.log("정상 시작!", event.data);
         setIsRunning(true);
 
         // start일 때에만 setInterval 시작
 
-        startTimer();
+        startTimer(timeLeft);
       } else if (event.data === "reset") {
         console.log("정상 리셋!", event.data);
         setIsRunning(false);
-        console.log("리셋 할 때의 input Second!!!", inputSecond);
         setTimeLeft(inputSecond);
 
         clearInterval(timerRef.current);
@@ -151,6 +151,9 @@ function Timer({ isAdmin: isOperator }) {
     } catch (error) {
       console.error("왜 Error가 났는 지 찾아보기");
     }
+  };
+  const handleStop = () => {
+    setIsRunning(false);
   };
 
   const handleReset = async () => {
@@ -226,7 +229,9 @@ function Timer({ isAdmin: isOperator }) {
             <button onClick={handleStart} disabled={isRunning}>
               Start
             </button>
-
+            <button onClick={handleStop} disabled={!isRunning}>
+              Stop
+            </button>
             <button onClick={handleReset}>Reset</button>
             <button onClick={handleMessage}>Websocket으로 메시지 보내기</button>
             <button>
@@ -238,33 +243,8 @@ function Timer({ isAdmin: isOperator }) {
         )}
       </div>
       {/* //*--------- 여기까지 admin 영역 *---------/ */}
-
-      {/* /* 모달 창 */}
-
-      {!isOperator && (
-        <ReactModal
-          isOpen={isModalOpen}
-          onRequestClose={closeModal}
-          shouldCloseOnOverlayClick={false}
-          contentLabel="Time's Up"
-          className='timeupModal'
-          overlayClassName='Overlay'
-        >
-          <h3>서로의 얼굴이 궁금하다면</h3>
-          <h3>필터 해제에 동의 해주세요</h3>
-          <p>모두 동의 시 5분의 추가 시간이 주어집니다.</p>
-          <button>
-            <a href='/'>여기서 그만하기</a>
-          </button>
-          <button>
-            <Link to='/meeting2' state={{ isAdmin: false }}>
-              동의하고 계속하기
-            </Link>
-          </button>
-        </ReactModal>
-      )}
     </div>
   );
 }
 
-export default Timer;
+export default Timer2;

@@ -40,7 +40,7 @@ function Timer({ isAdmin: isOperator }) {
       const timer = response.data.timer;
       console.log(timer.is_running, timer.time_left, "response Data");
       setIsRunning(timer.is_running);
-      setTimeLeft(timer.is_running ? Math.floor(timer.time_left) : 20);
+      setTimeLeft(timer.is_running ? Math.floor(timer.time_left) : inputSecond);
       console.log("---타이머 왜 안돼", isRunning, Math.floor(timer.time_left));
       if (timer.is_running) {
         console.log("타이머 실행 시작");
@@ -52,13 +52,14 @@ function Timer({ isAdmin: isOperator }) {
   };
 
   // 이전 타이머를 받아와서 1초씩 카운트다운 하는 함수
-  const startTimer = () => {
+  const startTimer = async () => {
     clearInterval(timerRef.current); // 이전 타이머가 있으면 정리
     timerRef.current = setInterval(() => {
       setTimeLeft((prevSeconds) => {
         if (prevSeconds <= 1) {
           clearInterval(timerRef.current);
           setIsModalOpen(true);
+          axios.post("/timer/reset");
           return 0;
         }
         return prevSeconds - 1;
@@ -185,15 +186,6 @@ function Timer({ isAdmin: isOperator }) {
     }
   };
 
-  const handleMessage = () => {
-    if (wsRef.current) {
-      wsRef.current.send("후후후 express 서버 연결 성공");
-      console.log("메시지 보냈음!!!");
-    } else {
-      console.log("WS가 연결이 안되어서 못보냄");
-    }
-  };
-
   return (
     <div className='timer-container'>
       <div className='timer-display' style={{ color: getBarColor(progress) }}>
@@ -228,7 +220,7 @@ function Timer({ isAdmin: isOperator }) {
             </button>
 
             <button onClick={handleReset}>Reset</button>
-            <button onClick={handleMessage}>Websocket으로 메시지 보내기</button>
+
             <button>
               <Link to='/meeting2' state={{ isAdmin: true }}>
                 관리자 meeting2 입장

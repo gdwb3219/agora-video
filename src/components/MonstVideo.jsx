@@ -156,6 +156,8 @@ function MonstVideo({ isOperator }) {
       agoraEngine.on("user-joined", handleJoined);
       agoraEngine.on("user-published", handleUserJoined);
       agoraEngine.on("user-left", handleUserLeft);
+
+      const AdminID = await agoraEngine.join(appId, channel, token);
     };
 
     const joinStream = async () => {
@@ -197,12 +199,30 @@ function MonstVideo({ isOperator }) {
   return (
     <>
       <div id='Videos-Container'>
-        <div id='local-video' ref={localElementRef} className='video-box'></div>
-        <div
-          id='remote-video'
-          ref={remoteElementRef}
-          className='video-box'
-        ></div>
+        {!isOperator ? (
+          <>
+            <div
+              id='local-video'
+              ref={localElementRef}
+              className='video-box'
+              style={{ width: "50%" }}
+            ></div>
+            <div
+              id='remote-video'
+              ref={remoteElementRef}
+              className='video-box'
+              style={{ width: "50%" }}
+            ></div>
+          </>
+        ) : (
+          <div
+            id='remote-video'
+            ref={remoteElementRef}
+            className='video-box'
+            style={{ display: "flex", width: "100%" }}
+          ></div>
+        )}
+
         <button
           id='change-filter-button'
           onClick={changeFilter}

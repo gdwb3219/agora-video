@@ -18,7 +18,7 @@ function Timer({ isAdmin: isOperator }) {
   const [isRunning, setIsRunning] = useState(false); // 진행 중 여부
   const [inputSecond, setInputSecond] = useState(600); // 입력 초기값
   // 현재 남은 시간 확인 (서버용)
-  const [timeLeft, setTimeLeft] = useState(null); // 초기 시간 설정
+  const [timeLeft, setTimeLeft] = useState(600); // 초기 시간 설정
   // 현재 남은 시간 확인 (리액트용)
   const [seconds, setSeconds] = useState(600);
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
@@ -35,16 +35,21 @@ function Timer({ isAdmin: isOperator }) {
   const fetchTimeLeft = async () => {
     try {
       console.log("서버 시간 불러온ㄷ!!!");
-      const response = await axios.get("/timer/time_left");
-      if (response.data.timer === "Not started") {
-        console.log("시작 안한 상태@@@");
-        setTimeLeft(seconds);
-        setIsRunning(false);
-      } else {
-        console.log("시작 한 상태@@@");
-        setTimeLeft(Math.floor(response.data.timer));
-        setIsRunning(true);
-      }
+      const response = await axios.get("/timer/status");
+      const timer = response.data.timer;
+      console.log(timer.is_running, timer.time_left, "response Data");
+      setIsRunning(timer.is_running);
+      setTimeLeft(timer.is_running ? Math.floor(timer.time_left) : 600);
+
+      // if (timer.is_running === false) {
+      //   console.log("시작 안한 상태@@@");
+      //   setTimeLeft(seconds);
+      //   setIsRunning(false);
+      // } else {
+      //   console.log("시작 한 상태@@@");
+      //   setTimeLeft(timer.time_left);
+      //   setIsRunning(true);
+      // }
     } catch (error) {
       console.error("Error fetching the time left:", error);
     }
@@ -89,6 +94,16 @@ function Timer({ isAdmin: isOperator }) {
     console.log("서버용 시간 확인");
     fetchTimeLeft();
     console.log("@@@@@", timeLeft, isRunning);
+
+    const timerInterval = setInterval(() => {
+      setTimeLeft((prevSeconds) => (prevSeconds > 0 ? prevSeconds - 1 : 0));
+    }, 1000);
+
+    if (timeLeft === 0) {
+      setIsModalOpen(true);
+    }
+
+    return () => clearInterval(timerInterval);
     // 처음 실행 시, 러닝 중이면(타이머 동작 중에 새로고침) 실행
     // if (isRunning === true) {
     //   console.log("새로고침 안했고, run상태 True로 바뀜");
@@ -117,33 +132,33 @@ function Timer({ isAdmin: isOperator }) {
     //   };
     //   fetchIsRunning();
     // }
-  }, [isRunning]);
+  }, []);
 
   // -----------------------------------------------------
   // timeLeft 변경 시 실행되는 useEffect 타이머 현재 남은 시간
-  useEffect(() => {
-    console.log("!@#", timeLeft, seconds);
-    if (timeLeft == false || timeLeft == null) {
-      console.log("timeLeft가 없는 듯?", timeLeft);
-    } else if (timeLeft <= 0) {
-      console.log("timeLeft가 0이어서 모달을 연다", timeLeft);
-      setIsModalOpen(true); // 타이머가 종료되면 모달을 열기
-      return;
-      // 시간이 다 소진되면 타이머 중지
-    } else {
-      console.log("??ㅋㅋ실행 중");
-      const intervalId = setInterval(() => {
-        setSeconds((prevTime) => {
-          if (prevTime <= 1) {
-            clearInterval(intervalId);
-            setIsRunning(false);
-            return 0;
-          }
-          return prevTime - 1;
-        });
-      }, 1000);
-    }
-  }, [timeLeft]);
+  // useEffect(() => {
+  //   console.log("!@#", timeLeft, seconds);
+  //   if (timeLeft == false || timeLeft == null) {
+  //     console.log("timeLeft가 없는 듯?", timeLeft);
+  //   } else if (timeLeft <= 0) {
+  //     console.log("timeLeft가 0이어서 모달을 연다", timeLeft);
+  //     setIsModalOpen(true); // 타이머가 종료되면 모달을 열기
+  //     return;
+  //     // 시간이 다 소진되면 타이머 중지
+  //   } else {
+  //     console.log("??ㅋㅋ실행 중");
+  //     const intervalId = setInterval(() => {
+  //       setSeconds((prevTime) => {
+  //         if (prevTime <= 1) {
+  //           clearInterval(intervalId);
+  //           setIsRunning(false);
+  //           return 0;
+  //         }
+  //         return prevTime - 1;
+  //       });
+  //     }, 1000);
+  //   }
+  // }, [timeLeft]);
 
   // 진행 바의 색깔을 비율에 따라 변경
   const getBarColor = (percentage) => {
@@ -241,7 +256,7 @@ function Timer({ isAdmin: isOperator }) {
   return (
     <div className='timer-container'>
       <div className='timer-display' style={{ color: getBarColor(progress) }}>
-        {isRunning ? formatTime(seconds) : "시작 전"}
+        {isRunning ? formatTime(timeLeft) : "시작 전"}
       </div>
       <div className='progress-bar'>
         <div
@@ -264,7 +279,7 @@ function Timer({ isAdmin: isOperator }) {
             disabled={isRunning}
           />
         )}
-        <div>Time Left: {seconds} seconds</div>
+        <div>Time Left: {timeLeft} seconds</div>
         {isOperator && (
           <>
             <button onClick={handleStart} disabled={isRunning}>

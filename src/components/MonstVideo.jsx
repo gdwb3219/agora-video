@@ -6,9 +6,9 @@ import "../css/MonstVideo.css";
 
 const licenseKey =
   "440ab2cf3bcab8d1e3166d945cc8e899bc345cc76e1855186f50b8fd013bc3566e3ab6c7b4ed75a0";
-const appId = "5a11237b69e2452cb234a5583b8d08ff";
+const appId = "4dc42fcbafad47ad9ae33c9879a5db6c";
 const token =
-  "007eJxTYBD/eleyei+vYnpLaZaUhQfTi2Nhm6arfvG/8nNKQ82l5AYFBtNEQ0MjY/MkM8tUIxNTo+QkI2OTRFNTC+MkixQDi7S0k9O60hoCGRnUWHVYGBkgEMRnYchNzMxjYAAADZ0eLg==";
+  "007eJxTYDjIK8044z+P6dT6EIFv89Qmdu9tr/QLdllty6x9WHtemp0Cg0lKsolRWnJSYlpiiol5YoplYqqxcbKlhbllomlKkllyysvutIZARoYoGW4mRgYIBPFZGHITM/MYGACg/R0x";
 const channel = "main";
 
 const effectList = [

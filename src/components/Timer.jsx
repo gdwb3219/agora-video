@@ -41,19 +41,29 @@ function Timer({ isAdmin: isOperator }) {
       console.log(timer.is_running, timer.time_left, "response Data");
       setIsRunning(timer.is_running);
       setTimeLeft(timer.is_running ? Math.floor(timer.time_left) : 600);
-
-      // if (timer.is_running === false) {
-      //   console.log("시작 안한 상태@@@");
-      //   setTimeLeft(seconds);
-      //   setIsRunning(false);
-      // } else {
-      //   console.log("시작 한 상태@@@");
-      //   setTimeLeft(timer.time_left);
-      //   setIsRunning(true);
-      // }
+      console.log("---타이머 왜 안돼", isRunning, Math.floor(timer.time_left));
+      if (timer.is_running) {
+        console.log("타이머 실행 시작");
+        startTimer(Math.floor(timer.time_left));
+      }
     } catch (error) {
       console.error("Error fetching the time left:", error);
     }
+  };
+
+  // 이전 타이머를 받아와서 1초씩 카운트다운 하는 함수
+  const startTimer = (initialSeconds) => {
+    clearInterval(timerRef.current); // 이전 타이머가 있으면 정리
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prevSeconds) => {
+        console.log("타이머 실행 중", prevSeconds);
+        if (prevSeconds <= 1) {
+          clearInterval(timerRef.current);
+          return 0;
+        }
+        return prevSeconds - 1;
+      });
+    }, 1000);
   };
 
   // ------------------------ web Socket 로컬 호스트 테스트 ----------------
@@ -73,9 +83,7 @@ function Timer({ isAdmin: isOperator }) {
 
         // start일 때에만 setInterval 시작
 
-        timerRef.current = setInterval(() => {
-          setTimeLeft((prevSeconds) => (prevSeconds > 0 ? prevSeconds - 1 : 0));
-        }, 1000);
+        startTimer(timeLeft);
       } else if (event.data === "reset") {
         console.log("정상 리셋!", event.data);
         setIsRunning(false);
@@ -117,61 +125,7 @@ function Timer({ isAdmin: isOperator }) {
     }
 
     return () => clearInterval(timerRef.current);
-    // 처음 실행 시, 러닝 중이면(타이머 동작 중에 새로고침) 실행
-    // if (isRunning === true) {
-    //   console.log("새로고침 안했고, run상태 True로 바뀜");
-
-    //   fetchTimeLeft();
-    // } else {
-    //   // 초기 실행 시, isRunning false인 경우, 서버에 요청해서 실행 중인지
-    //   // 확인 여부에 따라 isRUnning 변경
-    //   const fetchIsRunning = async () => {
-    //     try {
-    //       // 일단 서버에 요청할껀데, 서버가 false 면 냅두고,
-    //       // 서버가 러닝 중이면 state를 true로 변경
-    //       const response = await axios.get("/timer/time_left");
-    //       if (response.data.timer === "Not started") {
-    //         // client False, 서버 False
-    //         console.log("새로고침/Reset했고, 시작 안한 상태");
-    //       } else {
-    //         // client False, 서버가 True 상태인 경우
-    //         console.log("새로고침 했고, 시작한 상태");
-    //         setIsRunning(true);
-    //         fetchTimeLeft();
-    //       }
-    //     } catch (error) {
-    //       console.error("fetchIsRunning에서 에러");
-    //     }
-    //   };
-    //   fetchIsRunning();
-    // }
   }, []);
-
-  // -----------------------------------------------------
-  // timeLeft 변경 시 실행되는 useEffect 타이머 현재 남은 시간
-  // useEffect(() => {
-  //   console.log("!@#", timeLeft, seconds);
-  //   if (timeLeft == false || timeLeft == null) {
-  //     console.log("timeLeft가 없는 듯?", timeLeft);
-  //   } else if (timeLeft <= 0) {
-  //     console.log("timeLeft가 0이어서 모달을 연다", timeLeft);
-  //     setIsModalOpen(true); // 타이머가 종료되면 모달을 열기
-  //     return;
-  //     // 시간이 다 소진되면 타이머 중지
-  //   } else {
-  //     console.log("??ㅋㅋ실행 중");
-  //     const intervalId = setInterval(() => {
-  //       setSeconds((prevTime) => {
-  //         if (prevTime <= 1) {
-  //           clearInterval(intervalId);
-  //           setIsRunning(false);
-  //           return 0;
-  //         }
-  //         return prevTime - 1;
-  //       });
-  //     }, 1000);
-  //   }
-  // }, [timeLeft]);
 
   // 진행 바의 색깔을 비율에 따라 변경
   const getBarColor = (percentage) => {
@@ -229,7 +183,7 @@ function Timer({ isAdmin: isOperator }) {
 
   const handleReset = async () => {
     setIsRunning(false);
-    // setTimeLeft(inputSecond);
+    setTimeLeft(inputSecond);
 
     try {
       const response = await axios.post("/timer/reset");

@@ -3,6 +3,7 @@ import "../css/Timer.css";
 import ReactModal from "react-modal";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import Modal from "./Modal";
 
 // 모달의 루트 엘리먼트를 설정
 ReactModal.setAppElement("#root");
@@ -17,9 +18,9 @@ const formatTime = (seconds) => {
 
 function Timer({ isAdmin: isOperator }) {
   const [isRunning, setIsRunning] = useState(false); // 진행 중 여부
-  const [inputSecond, setInputSecond] = useState(600); // 입력 초기값
+  const [inputSecond, setInputSecond] = useState(10); // 입력 초기값
   // 현재 남은 시간 확인 (서버용)
-  const [timeLeft, setTimeLeft] = useState(600); // 초기 시간 설정
+  const [timeLeft, setTimeLeft] = useState(10); // 초기 시간 설정
   // 현재 남은 시간 확인 (리액트용)
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
   const timerRef = useRef(null);
@@ -29,8 +30,6 @@ function Timer({ isAdmin: isOperator }) {
   // const [ws, setWs] = useState(null);
   const wsRef = useRef(null);
   const [wsMessage, setWsMessage] = useState([]);
-
-  console.log("Timer 컴포넌트 실행@@@@", timeLeft);
 
   // 서버 시간을 불러와서 state에 반영하는 함수
   const fetchTimeLeft = async () => {
@@ -81,6 +80,7 @@ function Timer({ isAdmin: isOperator }) {
       if (event.data === "start") {
         console.log("정상 시작!", event.data, timeLeft);
         setIsRunning(true);
+        setTimeLeft(timeLeft);
 
         // start일 때에만 setInterval 시작
 
@@ -234,26 +234,7 @@ function Timer({ isAdmin: isOperator }) {
       {/* /* 모달 창 */}
 
       {!isOperator && (
-        <ReactModal
-          isOpen={isModalOpen}
-          onRequestClose={closeModal}
-          shouldCloseOnOverlayClick={false}
-          contentLabel="Time's Up"
-          className='timeupModal'
-          overlayClassName='Overlay'
-        >
-          <h3>서로의 얼굴이 궁금하다면</h3>
-          <h3>필터 해제에 동의 해주세요</h3>
-          <p>모두 동의 시 5분의 추가 시간이 주어집니다.</p>
-          <button>
-            <a href='/'>여기서 그만하기</a>
-          </button>
-          <button>
-            <Link to='/meeting2' state={{ isAdmin: false }}>
-              동의하고 계속하기
-            </Link>
-          </button>
-        </ReactModal>
+        <Modal isModalOpen={isModalOpen} closeModal={closeModal} />
       )}
     </div>
   );

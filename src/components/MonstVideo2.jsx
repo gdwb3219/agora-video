@@ -3,13 +3,11 @@ import React, { useEffect, useRef, useState } from "react";
 import * as deepar from "deepar";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import "../css/MonstVideo.css";
+import tokenData from "../token.json";
 
-// const licenseKey =
-//   "440ab2cf3bcab8d1e3166d945cc8e899bc345cc76e1855186f50b8fd013bc3566e3ab6c7b4ed75a0";
-const appId = "4dc42fcbafad47ad9ae33c9879a5db6c";
-const token =
-  "007eJxTYDjIK8044z+P6dT6EIFv89Qmdu9tr/QLdllty6x9WHtemp0Cg0lKsolRWnJSYlpiiol5YoplYqqxcbKlhbllomlKkllyysvutIZARoYoGW4mRgYIBPFZGHITM/MYGACg/R0x";
-const channel = "main";
+const appId = tokenData.appId;
+const token = tokenData.token;
+const channel = tokenData.channel;
 
 // const effectList = [
 //   "effects/Bomb.deepar",

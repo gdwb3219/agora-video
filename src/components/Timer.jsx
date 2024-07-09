@@ -69,14 +69,14 @@ function Timer({ isAdmin: isOperator }) {
   // ------------------------ web Socket 로컬 호스트 테스트 ----------------
   // local 8000 ws 간이 테스트 (서버에서 web socket 관리 기능 필요)
   useEffect(() => {
-    console.log("wsMessage", wsMessage);
+    console.log("웹소켓으로부터 받은 메시지", wsMessage);
     wsRef.current = new WebSocket("ws://localhost:8000/ws/timer_10min");
 
     // 웹소켓 이벤트 핸들러 (메시지 받는 경우)
     wsRef.current.onmessage = (event) => {
       console.log("Message 받았음 핸들러!!!");
       const newMessage = event.data;
-      setWsMessage((prevMessages) => [...prevMessages, newMessage]);
+      setWsMessage(newMessage);
       if (event.data === "start") {
         console.log("정상 시작!", event.data, timeLeft);
         setIsRunning(true);
@@ -233,8 +233,12 @@ function Timer({ isAdmin: isOperator }) {
 
       {/* /* 모달 창 */}
 
-      {!isOperator && (
-        <Modal isModalOpen={isModalOpen} closeModal={closeModal} />
+      {!isOperator && isModalOpen && (
+        <Modal
+          isModalOpen={isModalOpen}
+          closeModal={closeModal}
+          wsRef={wsRef}
+        />
       )}
     </div>
   );

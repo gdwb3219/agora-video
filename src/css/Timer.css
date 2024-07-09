@@ -25,34 +25,3 @@
   height: 100%;
   /* transition: width 1s linear; */
 }
-
-/* 모달 CSS */
-.timeupModal {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  right: auto;
-  bottom: auto;
-  margin-right: -50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 500px;
-  width: 50%;
-}
-
-.Overlay {
-  background-color: #202020;
-  position: fixed; /* 화면 전체를 덮도록 설정 */
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1000; /* 오버레이가 다른 요소보다 위에 위치하도록 */
-}
-button a {
-  text-decoration: none;
-  color: black;
-  cursor: default;
-}

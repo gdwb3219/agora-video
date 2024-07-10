@@ -1,22 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../css/Modal.css"; // 모달의 스타일을 정의한 CSS 파일
 import ReactModal from "react-modal";
-import { Link } from "react-router-dom";
+import { Link, Navigate, Redirect } from "react-router-dom";
 
 // 모달 컴포넌트
 function Modal({ isModalOpen, closeModal, wsRef }) {
   const [qtime, setQtime] = useState(30);
   const [answer, setAnswer] = useState(null);
+  const [redirect, setRedirect] = useState(false);
   const qtimeRef = useRef(null);
 
-  console.log("모달 컴포넌트 실행!?#3", qtimeRef.current, qtime);
+  // console.log("모달 컴포넌트 실행!?#3", qtimeRef.current, qtime);
   useEffect(() => {
     qtimeRef.current = setInterval(() => {
-      console.log("Interval 실행 중!!!#1", qtimeRef.current, qtime);
+      // console.log("Interval 실행 중!!!#1", qtimeRef.current, qtime);
       setQtime((prevSeconds) => {
-        console.log("Interval 실행 중!!!#2", qtime, prevSeconds);
+        // console.log("Interval 실행 중!!!#2", qtime, prevSeconds);
         if (prevSeconds <= 1) {
           clearInterval(qtimeRef.current);
+          setRedirect("qna");
 
           return 0;
         }
@@ -28,6 +30,23 @@ function Modal({ isModalOpen, closeModal, wsRef }) {
       clearInterval(qtimeRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    wsRef.current.onmessage = (event) => {
+      console.log("Model도 ws 메시지 받았다!", event.data);
+      if (event.data === "All true") {
+        console.log("modal도 All True가 실행되었어요!!!");
+        setRedirect("next");
+      }
+    };
+  }, []);
+
+  if (redirect === "next") {
+    return <Navigate to='/meeting2' />;
+  } else if (redirect === "qna") {
+    return <Navigate to='/qna' />;
+  }
+
   const handleTrue = () => {
     wsRef.current.send("true");
     console.log("더 합시다");
@@ -54,7 +73,7 @@ function Modal({ isModalOpen, closeModal, wsRef }) {
         <p>모두 동의 시 5분의 추가 시간이 주어집니다.</p>
         <button onClick={handleFalse}>
           {/* <a href='/'>여기서 그만하기</a> */}
-          여기서 그만하기
+          <Link to='/qna'>여기서 그만하기</Link>
         </button>
         {/* <button>
           <Link to='/meeting2' state={{ isAdmin: false }} onClick={handleTrue}>

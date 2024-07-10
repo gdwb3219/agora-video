@@ -4,6 +4,7 @@ import * as deepar from "deepar";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import "../css/MonstVideo.css";
 import tokenData from "../token.json";
+import { LocalVideoTrack } from "agora-rtc-react";
 
 const appId = tokenData.appId;
 const token = tokenData.token;
@@ -121,7 +122,7 @@ function MonstVideo2({ isOperator }) {
 
     const joinAndDisplayLocalStream = async () => {
       // const deepAREngine = await deepARInit();
-      // console.log(typeof deepAREngine, "777.=== deepAREngine 생성");
+      console.log(typeof deepAREngine, "777.=== deepAREngine 생성");
 
       agoraEngine.on("user-joined", handleJoined);
       agoraEngine.on("user-published", handleUserJoined);
@@ -136,6 +137,8 @@ function MonstVideo2({ isOperator }) {
       console.log("10.===agora 실행 전");
       console.log("11.===agora 실행 후, 커스텀 실행 전");
       const localTracks = await AgoraRTC.createMicrophoneAndCameraTracks();
+      const localPlayerContainer = localElementRef.current;
+      localTracks[1].play(localPlayerContainer);
       // const localVideoTrack = await AgoraRTC.createCustomVideoTrack({
       //   mediaStreamTrack: videoTrack,
       // });

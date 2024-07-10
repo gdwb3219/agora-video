@@ -94,6 +94,9 @@ function Timer({ isAdmin: isOperator }) {
         clearInterval(timerRef.current);
       } else {
         console.log("정상 else!", event.data);
+        if (event.data === "All true") {
+          console.log("All True가 실행되었어요!");
+        }
       }
     };
 

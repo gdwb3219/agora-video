@@ -7,25 +7,21 @@ import "../css/MeetingPage.css";
 import Timer from "../components/Timer";
 import CardBoard from "../components/CardBoard";
 import MonstVideo from "../components/MonstVideo";
+import Timer2 from "../components/Timer2";
 
 function MeetingPage() {
   let location = useLocation();
   const { isAdmin } = location.state || {};
-  // const [isAdmin, setIsOperator] = useState(isOperator);
-  const [inCall, setInCall] = useState(false);
-  console.log("관리자냐?", isAdmin);
 
-  useEffect(() => {
-    console.log("useEffect 실행 와드---", isAdmin);
-    setInCall(true);
-  }, []);
   return (
     <>
       <NavBar />
       <div className='total-container'>
         <div className='meeting-content'>
           <MonstVideo isOperator={isAdmin} />
-          <Timer isAdmin={isAdmin} />
+          <div>
+            <Timer isAdmin={isAdmin} />
+          </div>
         </div>
         <div className='card-content'>
           <CardBoard />

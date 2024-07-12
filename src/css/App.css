@@ -36,3 +36,11 @@
     transform: rotate(360deg);
   }
 }
+input.invalid-code {
+  border: 2px solid red;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.9em;
+}

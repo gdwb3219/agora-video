@@ -24,6 +24,7 @@ function Timer({ isAdmin: isOperator }) {
   // 현재 남은 시간 확인 (리액트용)
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
   const timerRef = useRef(null);
+  const pyWsRef = useRef("null");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // web socket 전용 state
@@ -65,6 +66,18 @@ function Timer({ isAdmin: isOperator }) {
       });
     }, 1000);
   };
+
+  // python ws
+  useEffect(() => {
+    console.log("파이썬 useEffect 실행", pyWsRef.current);
+    pyWsRef.current = new WebSocket(
+      "ws://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com:8000/ws/timer"
+    );
+
+    pyWsRef.current.onopen = () => {
+      console.log("파이썬 ws");
+    };
+  }, []);
 
   // ------------------------ web Socket 로컬 호스트 테스트 ----------------
   // local 8000 ws 간이 테스트 (서버에서 web socket 관리 기능 필요)

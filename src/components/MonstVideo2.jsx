@@ -1,34 +1,13 @@
 // Prod 버전 Video 구현 정리
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import * as deepar from "deepar";
 import AgoraRTC from "agora-rtc-sdk-ng";
-import "../css/MonstVideo.css";
+import "../css/MonstVideo2.css";
 import tokenData from "../token.json";
-import { LocalVideoTrack } from "agora-rtc-react";
 
 const appId = tokenData.appId;
 const token = tokenData.token;
 const channel = tokenData.channel;
-
-// const effectList = [
-//   "effects/Bomb.deepar",
-//   "effects/three-eye-monster.deepar",
-//   "effects/ray-ban-wayfarer.deepar",
-//   "effects/viking_helmet.deepar",
-//   "effects/MakeupLook.deepar",
-//   "effects/Split_View_Look.deepar",
-//   "effects/flower_face.deepar",
-//   "effects/Stallone.deepar",
-//   "effects/galaxy_background_web.deepar",
-//   "effects/Humanoid.deepar",
-//   "effects/Neon_Devil_Horns.deepar",
-//   "effects/Ping_Pong.deepar",
-//   "effects/Pixel_Hearts.deepar",
-//   "effects/Snail.deepar",
-//   "effects/Hope.deepar",
-//   "effects/Vendetta_Mask.deepar",
-//   "effects/Fire_Effect.deepar",
-// ];
 
 function MonstVideo2({ isOperator }) {
   // Log the version. Just in case.
@@ -198,13 +177,14 @@ function MonstVideo2({ isOperator }) {
 
   return (
     <>
-      <div id='Videos-Container'>
-        <div id='local-video' ref={localElementRef} className='video-box'></div>
-        <div
-          id='remote-video'
-          ref={remoteElementRef}
-          className='video-box'
-        ></div>
+      <div id='Videos-Container2'>
+        hi video
+        <div id='local-video2' ref={localElementRef} className='video-box'>
+          localVideo
+        </div>
+        {/* <div id='remote-video2' ref={remoteElementRef} className='video-box'>
+          remoteVideo
+        </div> */}
       </div>
     </>
   );

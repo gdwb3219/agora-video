@@ -18,9 +18,9 @@ const formatTime = (seconds) => {
 
 function Timer({ isAdmin: isOperator }) {
   const [isRunning, setIsRunning] = useState(false); // 진행 중 여부
-  const [inputSecond, setInputSecond] = useState(10); // 입력 초기값
+  const [inputSecond, setInputSecond] = useState(600); // 입력 초기값
   // 현재 남은 시간 확인 (서버용)
-  const [timeLeft, setTimeLeft] = useState(10); // 초기 시간 설정
+  const [timeLeft, setTimeLeft] = useState(600); // 초기 시간 설정
   // 현재 남은 시간 확인 (리액트용)
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
   const timerRef = useRef(null);
@@ -68,16 +68,16 @@ function Timer({ isAdmin: isOperator }) {
   };
 
   // python ws
-  useEffect(() => {
-    console.log("파이썬 useEffect 실행", pyWsRef.current);
-    pyWsRef.current = new WebSocket(
-      "ws://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com:8000/ws/timer"
-    );
+  // useEffect(() => {
+  //   console.log("파이썬 useEffect 실행", pyWsRef.current);
+  //   pyWsRef.current = new WebSocket(
+  //     "ws://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com:8000/ws/timer"
+  //   );
 
-    pyWsRef.current.onopen = () => {
-      console.log("파이썬 ws");
-    };
-  }, []);
+  //   pyWsRef.current.onopen = () => {
+  //     console.log("파이썬 ws");
+  //   };
+  // }, []);
 
   // ------------------------ web Socket 로컬 호스트 테스트 ----------------
   // local 8000 ws 간이 테스트 (서버에서 web socket 관리 기능 필요)

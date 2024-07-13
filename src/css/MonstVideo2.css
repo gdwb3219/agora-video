@@ -6,8 +6,18 @@
 
 #local-video2 {
   height: 480px;
+  width: 50%;
 }
 
 #remote-video2 {
   height: 480px;
+  width: 50%;
+}
+
+#remote-video2 div video {
+  /* object-fit: cover; */
+  /* width: auto;
+  height: auto; */
+  transform: rotateY(180deg);
+  object-fit: fill;
 }

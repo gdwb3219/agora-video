@@ -24,6 +24,7 @@ function Timer({ isAdmin: isOperator }) {
   // 현재 남은 시간 확인 (리액트용)
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
   const timerRef = useRef(null);
+  const pyWsRef = useRef("null");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // web socket 전용 state
@@ -66,17 +67,29 @@ function Timer({ isAdmin: isOperator }) {
     }, 1000);
   };
 
+  // python ws
+  useEffect(() => {
+    console.log("파이썬 useEffect 실행", pyWsRef.current);
+    pyWsRef.current = new WebSocket(
+      "ws://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com:8000/ws/timer"
+    );
+
+    pyWsRef.current.onopen = () => {
+      console.log("파이썬 ws");
+    };
+  }, []);
+
   // ------------------------ web Socket 로컬 호스트 테스트 ----------------
   // local 8000 ws 간이 테스트 (서버에서 web socket 관리 기능 필요)
   useEffect(() => {
-    console.log("wsMessage", wsMessage);
+    console.log("웹소켓으로부터 받은 메시지", wsMessage);
     wsRef.current = new WebSocket("ws://localhost:8000/ws/timer_10min");
 
     // 웹소켓 이벤트 핸들러 (메시지 받는 경우)
     wsRef.current.onmessage = (event) => {
       console.log("Message 받았음 핸들러!!!");
       const newMessage = event.data;
-      setWsMessage((prevMessages) => [...prevMessages, newMessage]);
+      setWsMessage(newMessage);
       if (event.data === "start") {
         console.log("정상 시작!", event.data, timeLeft);
         setIsRunning(true);
@@ -94,6 +107,9 @@ function Timer({ isAdmin: isOperator }) {
         clearInterval(timerRef.current);
       } else {
         console.log("정상 else!", event.data);
+        if (event.data === "All true") {
+          console.log("All True가 실행되었어요!");
+        }
       }
     };
 
@@ -233,8 +249,12 @@ function Timer({ isAdmin: isOperator }) {
 
       {/* /* 모달 창 */}
 
-      {!isOperator && (
-        <Modal isModalOpen={isModalOpen} closeModal={closeModal} />
+      {!isOperator && isModalOpen && (
+        <Modal
+          isModalOpen={isModalOpen}
+          closeModal={closeModal}
+          wsRef={wsRef}
+        />
       )}
     </div>
   );

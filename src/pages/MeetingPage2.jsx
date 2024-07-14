@@ -21,6 +21,7 @@ function MeetingPage2() {
     console.log("useEffect 실행 와드---", isAdmin);
     setInCall(true);
   }, []);
+
   return (
     <>
       <NavBar />

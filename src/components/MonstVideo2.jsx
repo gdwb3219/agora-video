@@ -181,12 +181,36 @@ function MonstVideo2({ isOperator }) {
   return (
     <>
       <div id='Videos-Container2'>
-        <div id='local-video2' ref={localElementRef} className='video-box'>
+        {/* <div id='local-video2' ref={localElementRef} className='video-box'>
           localVideo
         </div>
         <div id='remote-video2' ref={remoteElementRef} className='video-box'>
           remoteVideo
-        </div>
+        </div> */}
+
+        {!isOperator ? (
+          <>
+            <div
+              id='local-video2'
+              ref={localElementRef}
+              className='video-box'
+              style={{ width: "50%" }}
+            ></div>
+            <div
+              id='remote-video2'
+              ref={remoteElementRef}
+              className='video-box'
+              style={{ width: "50%" }}
+            ></div>
+          </>
+        ) : (
+          <div
+            id='remote-video2'
+            ref={remoteElementRef}
+            className='video-box'
+            style={{ display: "flex", width: "100%" }}
+          ></div>
+        )}
       </div>
     </>
   );

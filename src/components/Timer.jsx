@@ -5,6 +5,8 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import Modal from "./Modal";
 
+const round1time = 10;
+
 // 모달의 루트 엘리먼트를 설정
 ReactModal.setAppElement("#root");
 
@@ -18,9 +20,9 @@ const formatTime = (seconds) => {
 
 function Timer({ isAdmin: isOperator }) {
   const [isRunning, setIsRunning] = useState(false); // 진행 중 여부
-  const [inputSecond, setInputSecond] = useState(600); // 입력 초기값
+  const [inputSecond, setInputSecond] = useState(round1time); // 입력 초기값
   // 현재 남은 시간 확인 (서버용)
-  const [timeLeft, setTimeLeft] = useState(600); // 초기 시간 설정
+  const [timeLeft, setTimeLeft] = useState(round1time); // 초기 시간 설정
   // 현재 남은 시간 확인 (리액트용)
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
   const timerRef = useRef(null);
@@ -69,11 +71,10 @@ function Timer({ isAdmin: isOperator }) {
 
   // python ws
   // useEffect(() => {
-  //   console.log("파이썬 useEffect 실행", pyWsRef.current);
   //   pyWsRef.current = new WebSocket(
   //     "ws://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com:8000/ws/timer"
   //   );
-
+  //   console.log("파이썬 useEffect 실행", pyWsRef.current);
   //   pyWsRef.current.onopen = () => {
   //     console.log("파이썬 ws");
   //   };
@@ -159,14 +160,23 @@ function Timer({ isAdmin: isOperator }) {
     if (!isRunning) {
       setIsRunning(true);
       console.log("Running 상태로 변경 : True");
+      wsRef.current.send("start");
     }
     // axios로 서버에 시작 요청
     try {
+      // aws 서버용 (동일기능)
       const response = await axios.post(`/timer/start?duration=${inputSecond}`);
+      // const response = await axios.post(
+      //   `http://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com/timer/start?duration=${inputSecond}`
+      // );
+
+      // local 서버용
+      // const response = await axios.post(
+      //   `http://localhost:8000/timer/start?duration=${inputSecond}`
+      // );
       console.log(response, "서버 시간 start 됐다?");
-      wsRef.current.send("start");
     } catch (error) {
-      console.error("왜 Error가 났는 지 찾아보기");
+      console.error("start 에러, 왜 Error가 났는 지 찾아보기");
     }
   };
 
@@ -175,7 +185,16 @@ function Timer({ isAdmin: isOperator }) {
     setTimeLeft(inputSecond);
 
     try {
+      // aws 서버용 (동일기능)
       const response = await axios.post("/timer/reset");
+
+      // setupProxy 없이
+      // const response = await axios.post(
+      //   "http://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com/timer/reset"
+      // );
+
+      // local 서버용
+      // const response = await axios.post("http://localhost:8000/timer/reset");
       console.log(response, "Reset 완료!");
       wsRef.current.send("reset");
       clearInterval(timerRef.current);
@@ -199,6 +218,15 @@ function Timer({ isAdmin: isOperator }) {
       return "시작하기 전이에요!";
     } else {
       return "시간이 끝났어요!";
+    }
+  };
+
+  const handleServer = async () => {
+    try {
+      const response = await axios.get("/timer");
+      console.log(response, "서버 응답하라");
+    } catch (error) {
+      console.error(error, "handle Server에서 에러 났음. Error");
     }
   };
 
@@ -236,6 +264,7 @@ function Timer({ isAdmin: isOperator }) {
             </button>
 
             <button onClick={handleReset}>Reset</button>
+            <button onClick={handleServer}>server</button>
 
             <button>
               <Link to='/meeting2' state={{ isAdmin: true }}>

@@ -4,6 +4,8 @@ import ReactModal from "react-modal";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
+const round2time = 300;
+
 // 모달의 루트 엘리먼트를 설정
 ReactModal.setAppElement("#root");
 
@@ -17,9 +19,9 @@ const formatTime = (seconds) => {
 
 function Timer2({ isAdmin: isOperator }) {
   const [isRunning, setIsRunning] = useState(false); // 진행 중 여부
-  const [inputSecond, setInputSecond] = useState(600); // 입력 초기값
+  const [inputSecond, setInputSecond] = useState(round2time); // 입력 초기값
   // 현재 남은 시간 확인 (서버용)
-  const [timeLeft, setTimeLeft] = useState(600); // 초기 시간 설정
+  const [timeLeft, setTimeLeft] = useState(round2time); // 초기 시간 설정
   // 현재 남은 시간 확인 (리액트용)
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
   const timerRef = useRef(null);
@@ -30,7 +32,7 @@ function Timer2({ isAdmin: isOperator }) {
   const wsRef = useRef(null);
   const [wsMessage, setWsMessage] = useState([]);
 
-  console.log("Timer 컴포넌트 실행@@@@", timeLeft);
+  console.log("Timer222 컴포넌트 실행@@@@", timeLeft);
 
   // 서버 시간을 불러와서 state에 반영하는 함수
   const fetchTimeLeft = async () => {
@@ -40,7 +42,7 @@ function Timer2({ isAdmin: isOperator }) {
       const timer = response.data.timer;
       console.log(timer.is_running, timer.time_left, "response Data");
       setIsRunning(timer.is_running);
-      setTimeLeft(timer.is_running ? Math.floor(timer.time_left) : 10);
+      setTimeLeft(timer.is_running ? Math.floor(timer.time_left) : inputSecond);
       console.log("---타이머 왜 안돼", isRunning, Math.floor(timer.time_left));
       if (timer.is_running) {
         console.log("타이머 실행 시작");
@@ -233,12 +235,6 @@ function Timer2({ isAdmin: isOperator }) {
               Stop
             </button>
             <button onClick={handleReset}>Reset</button>
-            <button onClick={handleMessage}>Websocket으로 메시지 보내기</button>
-            <button>
-              <Link to='/meeting2' state={{ isAdmin: true }}>
-                관리자 meeting2 입장
-              </Link>
-            </button>
           </>
         )}
       </div>

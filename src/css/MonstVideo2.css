@@ -6,12 +6,10 @@
 
 #local-video2 {
   height: 480px;
-  width: 50%;
 }
 
 #remote-video2 {
   height: 480px;
-  width: 50%;
 }
 
 #remote-video2 div video {

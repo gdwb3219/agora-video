@@ -62,6 +62,12 @@ function Timer({ isAdmin: isOperator }) {
           clearInterval(timerRef.current);
           setIsModalOpen(true);
           axios.post("/timer/reset");
+          setIsRunning(false);
+          if (isOperator) {
+            console.log("");
+            wsRef.current.send("Timer Complete");
+          }
+
           return 0;
         }
         return prevSeconds - 1;
@@ -104,13 +110,11 @@ function Timer({ isAdmin: isOperator }) {
         setIsRunning(false);
         console.log("리셋 할 때의 input Second!!!", inputSecond);
         setTimeLeft(inputSecond);
-
         clearInterval(timerRef.current);
+      } else if (event.data === "All true") {
+        console.log("All True가 실행되었어요!");
       } else {
         console.log("정상 else!", event.data);
-        if (event.data === "All true") {
-          console.log("All True가 실행되었어요!");
-        }
       }
     };
 
@@ -126,7 +130,7 @@ function Timer({ isAdmin: isOperator }) {
     return () => {
       wsRef.current.close();
     };
-  }, [wsMessage]);
+  }, []);
 
   // ------------------------ web Socket 로컬 호스트 테스트 ----------------
 
@@ -221,15 +225,6 @@ function Timer({ isAdmin: isOperator }) {
     }
   };
 
-  const handleServer = async () => {
-    try {
-      const response = await axios.get("/timer");
-      console.log(response, "서버 응답하라");
-    } catch (error) {
-      console.error(error, "handle Server에서 에러 났음. Error");
-    }
-  };
-
   return (
     <div className='timer-container'>
       <div className='timer-display' style={{ color: getBarColor(progress) }}>
@@ -264,7 +259,6 @@ function Timer({ isAdmin: isOperator }) {
             </button>
 
             <button onClick={handleReset}>Reset</button>
-            <button onClick={handleServer}>server</button>
 
             <button>
               <Link to='/meeting2' state={{ isAdmin: true }}>

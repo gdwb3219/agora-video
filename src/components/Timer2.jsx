@@ -2,9 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import "../css/Timer.css";
 import ReactModal from "react-modal";
 import axios from "axios";
-import { Link } from "react-router-dom";
 
-const round2time = 300;
+const round2time = 30;
 
 // 모달의 루트 엘리먼트를 설정
 ReactModal.setAppElement("#root");
@@ -25,14 +24,11 @@ function Timer2({ isAdmin: isOperator }) {
   // 현재 남은 시간 확인 (리액트용)
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
   const timerRef = useRef(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // web socket 전용 state
   // const [ws, setWs] = useState(null);
   const wsRef = useRef(null);
   const [wsMessage, setWsMessage] = useState([]);
-
-  console.log("Timer222 컴포넌트 실행@@@@", timeLeft);
 
   // 서버 시간을 불러와서 state에 반영하는 함수
   const fetchTimeLeft = async () => {
@@ -54,14 +50,15 @@ function Timer2({ isAdmin: isOperator }) {
   };
 
   // 이전 타이머를 받아와서 1초씩 카운트다운 하는 함수
-  const startTimer = (initialSeconds) => {
+  const startTimer = async () => {
     clearInterval(timerRef.current); // 이전 타이머가 있으면 정리
     timerRef.current = setInterval(() => {
       setTimeLeft((prevSeconds) => {
-        console.log("타이머 실행 중", prevSeconds);
         if (prevSeconds <= 1) {
           clearInterval(timerRef.current);
-          setIsModalOpen(true);
+          axios.post("/timer/reset");
+          setIsRunning(false);
+          window.location.href = "https://forms.gle/gYvNCvFbtBFQYgeA9";
           return 0;
         }
         return prevSeconds - 1;
@@ -110,7 +107,7 @@ function Timer2({ isAdmin: isOperator }) {
     return () => {
       wsRef.current.close();
     };
-  }, [wsMessage]);
+  }, []);
 
   // ------------------------ web Socket 로컬 호스트 테스트 ----------------
 
@@ -134,11 +131,6 @@ function Timer2({ isAdmin: isOperator }) {
     return "red";
   };
 
-  // 모달 팝업 닫기
-  const closeModal = () => {
-    setIsModalOpen(false); // 모달 닫기
-  };
-
   // ------------------ 타이버 조작 버튼 (관리자) ------------------
   const handleStart = async () => {
     if (!isRunning) {
@@ -153,9 +145,6 @@ function Timer2({ isAdmin: isOperator }) {
     } catch (error) {
       console.error("왜 Error가 났는 지 찾아보기");
     }
-  };
-  const handleStop = () => {
-    setIsRunning(false);
   };
 
   const handleReset = async () => {
@@ -231,9 +220,7 @@ function Timer2({ isAdmin: isOperator }) {
             <button onClick={handleStart} disabled={isRunning}>
               Start
             </button>
-            <button onClick={handleStop} disabled={!isRunning}>
-              Stop
-            </button>
+
             <button onClick={handleReset}>Reset</button>
           </>
         )}

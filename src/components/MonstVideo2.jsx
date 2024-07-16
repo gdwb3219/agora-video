@@ -140,6 +140,8 @@ function MonstVideo2({ isOperator }) {
       agoraEngine.on("user-joined", handleJoined);
       agoraEngine.on("user-published", handleUserJoined);
       agoraEngine.on("user-left", handleUserLeft);
+
+      const AdminID = await agoraEngine.join(appId, channel, token);
     };
 
     const joinStream = async () => {

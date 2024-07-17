@@ -37,15 +37,13 @@ function Timer({ isAdmin: isOperator }) {
   // 서버 시간을 불러와서 state에 반영하는 함수
   const fetchTimeLeft = async () => {
     try {
-      console.log("서버 시간 불러온ㄷ!!!");
       const response = await axios.get("/timer/status");
       const timer = response.data.timer;
-      console.log(timer.is_running, timer.time_left, "response Data");
+
       setIsRunning(timer.is_running);
       setTimeLeft(timer.is_running ? Math.floor(timer.time_left) : inputSecond);
-      console.log("---타이머 왜 안돼", isRunning, Math.floor(timer.time_left));
+
       if (timer.is_running) {
-        console.log("타이머 실행 시작");
         startTimer();
       }
     } catch (error) {
@@ -76,15 +74,30 @@ function Timer({ isAdmin: isOperator }) {
   };
 
   // python ws
-  // useEffect(() => {
-  //   pyWsRef.current = new WebSocket(
-  //     "ws://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com:8000/ws/timer"
-  //   );
-  //   console.log("파이썬 useEffect 실행", pyWsRef.current);
-  //   pyWsRef.current.onopen = () => {
-  //     console.log("파이썬 ws");
-  //   };
-  // }, []);
+  useEffect(() => {
+    pyWsRef.current = new WebSocket(
+      "ws://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com:8000/ws/timer"
+    );
+    console.log("파이썬 useEffect 실행", pyWsRef.current);
+    pyWsRef.current.onopen = () => {
+      console.log("파이썬 ws 연결");
+    };
+
+    try {
+      pyWsRef.current.send(
+        JSON.stringify({
+          action: "time_left",
+        })
+      );
+    } catch (error) {
+      console.error("Error 발생!!!");
+    }
+
+    // pyWsRef.current.send("start");
+    pyWsRef.current.onmessage = (event) => {
+      console.log("Python WS에서 메시지가 온거 같다?", event.data);
+    };
+  }, []);
 
   // ------------------------ web Socket 로컬 호스트 테스트 ----------------
   // local 8000 ws 간이 테스트 (서버에서 web socket 관리 기능 필요)
@@ -108,11 +121,10 @@ function Timer({ isAdmin: isOperator }) {
       } else if (event.data === "reset") {
         console.log("정상 리셋!", event.data);
         setIsRunning(false);
-        console.log("리셋 할 때의 input Second!!!", inputSecond);
+
         setTimeLeft(inputSecond);
         clearInterval(timerRef.current);
       } else if (event.data === "All true") {
-        console.log("All True가 실행되었어요!");
       } else {
         console.log("정상 else!", event.data);
       }
@@ -139,7 +151,6 @@ function Timer({ isAdmin: isOperator }) {
   useEffect(() => {
     console.log("서버용 시간 확인");
     fetchTimeLeft();
-    console.log("@@@@@", timeLeft, isRunning);
 
     // 프론트 타이머 시간 관리
 
@@ -163,7 +174,7 @@ function Timer({ isAdmin: isOperator }) {
   const handleStart = async () => {
     if (!isRunning) {
       setIsRunning(true);
-      console.log("Running 상태로 변경 : True");
+
       wsRef.current.send("start");
     }
     // axios로 서버에 시작 요청

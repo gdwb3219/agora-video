@@ -58,7 +58,9 @@ function Timer2({ isAdmin: isOperator }) {
           clearInterval(timerRef.current);
           axios.post("/timer/reset");
           setIsRunning(false);
-          window.location.href = "https://forms.gle/gYvNCvFbtBFQYgeA9";
+          if (!isOperator) {
+            window.location.href = "https://forms.gle/gYvNCvFbtBFQYgeA9";
+          }
           return 0;
         }
         return prevSeconds - 1;

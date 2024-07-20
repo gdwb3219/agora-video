@@ -55,6 +55,8 @@ function Modal({ isModalOpen, closeModal, pyWsRef }) {
   }, []);
 
   if (redirect === 'next') {
+    console.log('init 메시지 sending');
+    pyWsRef.current.send(JSON.stringify({ action: 'init' }));
     return <Navigate to="/meeting2" />;
   } else if (redirect === 'qna') {
     return <Navigate to="/qna" />;
@@ -70,6 +72,7 @@ function Modal({ isModalOpen, closeModal, pyWsRef }) {
     pyWsRef.current.send(JSON.stringify({ action: 'false' }));
     console.log('여기서 그만합시다');
     setAnswer('거절 하셨습니다. 잠시만 대기해주세요.');
+    window.location.href = 'https://forms.gle/ytJQ6kRqPwBHQGxP7';
   };
   return (
     <>

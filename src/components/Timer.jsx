@@ -5,7 +5,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Modal from './Modal';
 
-const round1time = 2;
+const round1time = 10;
 
 // 모달의 루트 엘리먼트를 설정
 ReactModal.setAppElement('#root');
@@ -58,20 +58,18 @@ function Timer({ isAdmin: isOperator }) {
     timerRef.current = setInterval(() => {
       setTimeLeft((prevSeconds) => {
         if (prevSeconds <= 1) {
-          console.log('Timer함수 안에서 시간 종료1');
           clearInterval(timerRef.current);
-          console.log('Timer함수 안에서 시간 종료2');
+
           setIsModalOpen(true);
-          console.log('Timer함수 안에서 시간 종료3');
+
           axios.post('/timer/reset');
-          console.log('Timer함수 안에서 시간 종료4');
+
           setIsRunning(false);
-          console.log('Timer함수 안에서 시간 종료5');
+
           if (isOperator) {
             console.log('Time Complete');
             // pyWsRef.current.send('Timer Complete');
           }
-          console.log('Timer함수 안에서 시간 종료6');
 
           return 0;
         }
@@ -204,13 +202,13 @@ function Timer({ isAdmin: isOperator }) {
   const handleStart = async () => {
     if (!isRunning) {
       setIsRunning(true);
-
       pyWsRef.current.send(JSON.stringify({ action: 'start' }));
     }
     // axios로 서버에 시작 요청
     try {
       // aws 서버용 (동일기능)
       const response = await axios.post(`/timer/start?duration=${inputSecond}`);
+
       // const response = await axios.post(
       //   `http://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com/timer/start?duration=${inputSecond}`
       // );
@@ -304,8 +302,6 @@ function Timer({ isAdmin: isOperator }) {
             </button>
 
             <button onClick={handleReset}>Reset</button>
-
-            <button onClick={handleServer}>Server</button>
 
             <button>
               <Link to="/meeting2" state={{ isAdmin: true }}>

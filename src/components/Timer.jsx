@@ -5,7 +5,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Modal from './Modal';
 
-const round1time = 10;
+const round1time = 2;
 
 // 모달의 루트 엘리먼트를 설정
 ReactModal.setAppElement('#root');
@@ -26,7 +26,8 @@ function Timer({ isAdmin: isOperator }) {
   // 현재 남은 시간 확인 (리액트용)
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
   const timerRef = useRef(null);
-  const pyWsRef = useRef('null');
+  const pyWsRef = useRef(null);
+  const tsWsRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // web socket 전용 state
@@ -68,7 +69,7 @@ function Timer({ isAdmin: isOperator }) {
           console.log('Timer함수 안에서 시간 종료5');
           if (isOperator) {
             console.log('Time Complete');
-            pyWsRef.current.send('Timer Complete');
+            // pyWsRef.current.send('Timer Complete');
           }
           console.log('Timer함수 안에서 시간 종료6');
 
@@ -79,7 +80,17 @@ function Timer({ isAdmin: isOperator }) {
     }, 1000);
   };
 
-  // python ws
+  // 태섭 ws fastapi
+  // useEffect(() => {
+  //   tsWsRef.current = new WebSocket(
+  //     'ws://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com/ws/timer'
+  //   );
+  //   tsWsRef.current.onopen = () => {
+  //     console.log('태섭 ws 연결');
+  //   };
+  // });
+
+  // python ws/timer
   useEffect(() => {
     pyWsRef.current = new WebSocket('ws://127.0.0.1:8000/ws/timer');
     pyWsRef.current.onopen = () => {
@@ -244,6 +255,10 @@ function Timer({ isAdmin: isOperator }) {
     // setTimeLeft(newTime);
   };
 
+  const handleServer = () => {
+    tsWsRef.current.send(JSON.stringify({ action: 'time_left' }));
+  };
+
   // 타이머 메시지 함수
   const renderMessage = () => {
     if (isRunning && timeLeft > 0) {
@@ -289,6 +304,8 @@ function Timer({ isAdmin: isOperator }) {
             </button>
 
             <button onClick={handleReset}>Reset</button>
+
+            <button onClick={handleServer}>Server</button>
 
             <button>
               <Link to="/meeting2" state={{ isAdmin: true }}>

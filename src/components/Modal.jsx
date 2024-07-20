@@ -9,6 +9,7 @@ function Modal({ isModalOpen, closeModal, pyWsRef }) {
   const [answer, setAnswer] = useState(null);
   const [redirect, setRedirect] = useState(false);
   const qtimeRef = useRef(null);
+  const resWSRef = useRef(null);
 
   // console.log("모달 컴포넌트 실행!?#3", qtimeRef.current, qtime);
   useEffect(() => {
@@ -18,7 +19,7 @@ function Modal({ isModalOpen, closeModal, pyWsRef }) {
         // console.log("Interval 실행 중!!!#2", qtime, prevSeconds);
         if (prevSeconds <= 1) {
           clearInterval(qtimeRef.current);
-          pyWsRef.current.send('User가 제한 시간 내 선택하지 않았습니다.');
+          // pyWsRef.current.send('User가 제한 시간 내 선택하지 않았습니다.');
           window.location.href = 'https://forms.gle/ytJQ6kRqPwBHQGxP7';
           return 0;
         }
@@ -31,11 +32,20 @@ function Modal({ isModalOpen, closeModal, pyWsRef }) {
     };
   }, []);
 
+  // pyWS response 웹소켓 연결
+  // useEffect(() => {
+  //   resWSRef.current = new WebSocket('ws://127.0.0.1:8000/ws/response');
+  //   resWSRef.current.onopen = () => {
+  //     console.log('파이썬 resWSRef 연결');
+  //   };
+  // }, []);
+
+  // Python Websocket 연결 및 메시지 이벤트 핸들러 등록
   useEffect(() => {
     pyWsRef.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log('Model도 ws 메시지 받았다!', event.data, data);
-      if (event.data === 'All true') {
+      console.log('modal도 ws 메시지 받았다!', event.data, data);
+      if (data === 'All True') {
         console.log('modal도 All True가 실행되었어요!!!');
         setRedirect('next');
       } else {
@@ -51,13 +61,13 @@ function Modal({ isModalOpen, closeModal, pyWsRef }) {
   }
 
   const handleTrue = () => {
-    pyWsRef.current.send('true');
+    pyWsRef.current.send(JSON.stringify({ action: 'true' }));
     console.log('더 합시다');
     setAnswer('수락 하셨습니다. 잠시만 대기해주세요.');
   };
 
   const handleFalse = () => {
-    pyWsRef.current.send('false');
+    pyWsRef.current.send(JSON.stringify({ action: 'false' }));
     console.log('여기서 그만합시다');
     setAnswer('거절 하셨습니다. 잠시만 대기해주세요.');
   };

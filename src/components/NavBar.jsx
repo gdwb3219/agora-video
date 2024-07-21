@@ -7,7 +7,7 @@ function NavBar() {
       <div className="nav-header">
         <div className="logo-container">
           <a href="/" className="logo">
-            MonstAR 로고
+            MonstAR
           </a>
         </div>
 

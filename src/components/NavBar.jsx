@@ -28,6 +28,10 @@ function NavBar() {
     }
   };
 
+  const handleQuit = () => {
+    window.location.href = "https://forms.gle/ytJQ6kRqPwBHQGxP7";
+  };
+
   return (
     <div className='navbar'>
       <div className='nav-header'>
@@ -37,7 +41,9 @@ function NavBar() {
           </a>
         </div>
 
-        <button className='nav-button'>매칭 종료하기</button>
+        <button className='nav-button' onClick={handleQuit}>
+          매칭 종료하기
+        </button>
       </div>
 
       <div className='cards-container'>

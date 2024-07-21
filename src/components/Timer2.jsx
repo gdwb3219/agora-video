@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import "../css/Timer.css";
 import ReactModal from "react-modal";
 import axios from "axios";
+import tokenData from "../token.json";
 
 const round2time = 30;
 
@@ -72,7 +73,7 @@ function Timer2({ isAdmin: isOperator }) {
   // ------------------------ web Socket 로컬 호스트 테스트 ----------------
   // local 8000 ws 간이 테스트 (서버에서 web socket 관리 기능 필요)
   useEffect(() => {
-    pyWsRef.current = new WebSocket("ws://127.0.0.1:8000/ws/timer");
+    pyWsRef.current = new WebSocket(tokenData.websocketurl);
     pyWsRef.current.onopen = () => {
       console.log("파이썬 ws 연결");
     };

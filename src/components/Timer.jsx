@@ -4,6 +4,7 @@ import ReactModal from "react-modal";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import Modal from "./Modal";
+import tokenData from "../token.json";
 
 const round1time = 10;
 
@@ -90,7 +91,7 @@ function Timer({ isAdmin: isOperator }) {
 
   // python ws/timer
   useEffect(() => {
-    pyWsRef.current = new WebSocket("ws://127.0.0.1:8000/ws/timer");
+    pyWsRef.current = new WebSocket(tokenData.websocketurl);
     pyWsRef.current.onopen = () => {
       console.log("파이썬 ws 연결");
     };
@@ -226,20 +227,11 @@ function Timer({ isAdmin: isOperator }) {
   const handleReset = async () => {
     setIsRunning(false);
     setTimeLeft(inputSecond);
-
+    pyWsRef.current.send(JSON.stringify({ action: "reset" }));
     try {
-      // aws 서버용 (동일기능)
       const response = await axios.post("/timer/reset");
-
-      // setupProxy 없이
-      // const response = await axios.post(
-      //   "http://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com/timer/reset"
-      // );
-
-      // local 서버용
-      // const response = await axios.post("http://localhost:8000/timer/reset");
       console.log(response, "Reset 완료!");
-      pyWsRef.current.send(JSON.stringify({ action: "reset" }));
+
       clearInterval(timerRef.current);
     } catch (error) {
       console.error("Error 났음, Reset에서");
@@ -259,8 +251,8 @@ function Timer({ isAdmin: isOperator }) {
 
   // 타이머 메시지 함수
   const renderMessage = () => {
-    if (isRunning && timeLeft > 0) {
-      return "시간이 가고 있어요!";
+    if (isRunning && timeLeft < 180) {
+      return "시간이 얼마 남지 않았어요!";
     } else if (!isRunning && timeLeft > 0) {
       return "시작하기 전이에요!";
     } else {

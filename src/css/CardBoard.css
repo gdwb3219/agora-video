@@ -41,7 +41,7 @@
 }
 
 .card-item:hover {
-  background-color: #404040;
+  background-color: #3fff00;
 }
 
 /* 새로 고침 버튼 스타일 */
@@ -57,5 +57,5 @@
 }
 
 .update-button:hover {
-  background-color: #f0f0f0;
+  background-color: #abd47f;
 }

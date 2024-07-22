@@ -65,6 +65,7 @@ function Timer2({ isAdmin: isOperator }) {
           }
           return 0;
         }
+        setProgress(((prevSeconds - 1) / inputSecond) * 100); // progress를 남은 시간 비율에 따라 업데이트
         return prevSeconds - 1;
       });
     }, 1000);
@@ -169,8 +170,10 @@ function Timer2({ isAdmin: isOperator }) {
 
   // 타이머 메시지 함수
   const renderMessage = () => {
-    if (isRunning && timeLeft > 0) {
-      return "시간이 가고 있어요!";
+    if (isRunning && timeLeft < 180) {
+      return "시간이 얼마 남지 않았어요!";
+    } else if (isRunning) {
+      return " ";
     } else if (!isRunning && timeLeft > 0) {
       return "시작하기 전이에요!";
     } else {

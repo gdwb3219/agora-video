@@ -190,7 +190,7 @@ function Timer({ isAdmin: isOperator }) {
   // 진행 바의 색깔을 비율에 따라 변경
   const getBarColor = (percentage) => {
     if (!isRunning) return "gray";
-    if (percentage > 50) return "limegreen";
+    if (percentage > 50) return "#3fff00";
     if (percentage > 20) return "orange";
     return "red";
   };
@@ -285,9 +285,10 @@ function Timer({ isAdmin: isOperator }) {
             disabled={isRunning}
           />
         )}
-        <div>Time Left: {timeLeft} seconds</div>
+
         {isOperator && (
           <>
+            <div>Time Left: {timeLeft} seconds</div>
             <button onClick={handleStart} disabled={isRunning}>
               Start
             </button>

@@ -1,21 +1,48 @@
 // Prod 버전 Video 구현 정리
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as deepar from "deepar";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import "../css/MonstVideo2.css";
+import axios from "axios";
 import tokenData from "../token.json";
 
 const appId = tokenData.appId;
-const token = tokenData.token;
-const channel = tokenData.channel;
+// const token = tokenData.token;
+const channel = tokenData.channel_nonfilt;
 
 function MonstVideo2({ isOperator }) {
+  const [options, setOptions] = useState({
+    appId: appId,
+    channel: channel,
+    role: "host",
+  });
   // Log the version. Just in case.
   console.log("Deepar version: " + deepar.version);
   console.log("Agora version: " + AgoraRTC.VERSION);
   // const [filterIndex, setFilterIndex] = useState(0);
   // const [isSwitchingEffect, setIsSwitchingEffect] = useState(false);
   // UseRef
+  const fetchToken = async (uid, channelName, tokenRole) => {
+    try {
+      const response = await axios.post(
+        // "http://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com/generate-token",
+        "https://www.api.monst-ar.com/generate-token",
+        {
+          uid: uid,
+          channelName: channelName,
+          role: tokenRole === "host" ? "publisher" : "subscriber",
+        },
+        {
+          headers: {
+            "Content-Type": "application/json; charset=UTF-8",
+          },
+        }
+      );
+      return response.data.token;
+    } catch (error) {
+      console.error("Error fetching token:", error);
+    }
+  };
   const localElementRef = useRef(null);
   const remoteElementRef = useRef(null);
   const agoraEngineRef = useRef(
@@ -66,7 +93,7 @@ function MonstVideo2({ isOperator }) {
       // remote 화질 저하
 
       // 유저의 미디어를 수신한다!!!
-      await agoraEngine.subscribe(user, mediaType);
+      const LocalId = await agoraEngine.subscribe(user, mediaType);
       console.log("18.=== agora Subscribe!!! 완료!!");
 
       if (mediaType === "video") {
@@ -126,8 +153,14 @@ function MonstVideo2({ isOperator }) {
       // });
       // const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
       // console.log(localVideoTrack, "12.=== deep 적용 로컬 트랙 생성!!!");
+      const uid = Math.floor(Math.random() * 10000); // UID 생성
+      let token = await fetchToken(uid, options.channel, options.role);
+      if (!token) {
+        console.error("Failed to fetch token.");
+        return;
+      }
 
-      const localUID = await agoraEngine.join(appId, channel, token);
+      const localUID = await agoraEngine.join(appId, channel, token, uid);
 
       console.log(localUID, "13.===localUIDlocalUID, 로컬 아이디 등록!!!");
 
@@ -140,17 +173,20 @@ function MonstVideo2({ isOperator }) {
       agoraEngine.on("user-joined", handleJoined);
       agoraEngine.on("user-published", handleUserJoined);
       agoraEngine.on("user-left", handleUserLeft);
+      const uid = Math.floor(Math.random() * 10000); // UID 생성
+      let token = await fetchToken(uid, options.channel, options.role);
+      if (!token) {
+        console.error("Failed to fetch token.");
+        return;
+      }
 
-      const AdminID = await agoraEngine.join(appId, channel, token);
+      await agoraEngine.join(appId, channel, token, uid);
     };
 
     const joinStream = async () => {
-      console.log("111.===Join Stream 시작");
       if (!isOperator) {
-        // isOperator False 인 경우 (일반 유저)
         await joinAndDisplayLocalStream();
       } else {
-        // 관리자인 경우
         await joinJustLocalStream();
       }
     };
@@ -182,7 +218,7 @@ function MonstVideo2({ isOperator }) {
 
   return (
     <>
-      <div id='Videos-Container2'>
+      <div id="Videos-Container2">
         {/* <div id='local-video2' ref={localElementRef} className='video-box'>
           localVideo
         </div>
@@ -193,23 +229,23 @@ function MonstVideo2({ isOperator }) {
         {!isOperator ? (
           <>
             <div
-              id='local-video2'
+              id="local-video2"
               ref={localElementRef}
-              className='video-box'
+              className="video-box"
               style={{ width: "50%" }}
             ></div>
             <div
-              id='remote-video2'
+              id="remote-video2"
               ref={remoteElementRef}
-              className='video-box'
+              className="video-box"
               style={{ width: "50%" }}
             ></div>
           </>
         ) : (
           <div
-            id='remote-video2'
+            id="remote-video2"
             ref={remoteElementRef}
-            className='video-box'
+            className="video-box"
             style={{ display: "flex", width: "100%" }}
           ></div>
         )}

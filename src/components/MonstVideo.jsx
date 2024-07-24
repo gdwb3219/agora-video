@@ -7,7 +7,7 @@ import tokenData from "../token.json";
 
 const licenseKey = tokenData.licenseKey;
 const appId = tokenData.appId;
-const channel = tokenData.channel;
+const channel = tokenData.channel_filter;
 
 const effectList = [
   "effects/Bomb.deepar",
@@ -51,7 +51,8 @@ function MonstVideo({ isOperator }) {
   const fetchToken = async (uid, channelName, tokenRole) => {
     try {
       const response = await axios.post(
-        "http://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com/generate-token",
+        // "http://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com/generate-token",
+        "https://www.api.monst-ar.com/generate-token",
         {
           uid: uid,
           channelName: channelName,

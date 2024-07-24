@@ -4,8 +4,9 @@ import ReactModal from "react-modal";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import Modal from "./Modal";
+import tokenData from "../token.json";
 
-const round1time = 10;
+const round1time = 20;
 
 // 모달의 루트 엘리먼트를 설정
 ReactModal.setAppElement("#root");
@@ -26,7 +27,8 @@ function Timer({ isAdmin: isOperator }) {
   // 현재 남은 시간 확인 (리액트용)
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
   const timerRef = useRef(null);
-  const pyWsRef = useRef("null");
+  const pyWsRef = useRef(null);
+  const tsWsRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // web socket 전용 state
@@ -37,15 +39,13 @@ function Timer({ isAdmin: isOperator }) {
   // 서버 시간을 불러와서 state에 반영하는 함수
   const fetchTimeLeft = async () => {
     try {
-      console.log("서버 시간 불러온ㄷ!!!");
       const response = await axios.get("/timer/status");
       const timer = response.data.timer;
-      console.log(timer.is_running, timer.time_left, "response Data");
+
       setIsRunning(timer.is_running);
       setTimeLeft(timer.is_running ? Math.floor(timer.time_left) : inputSecond);
-      console.log("---타이머 왜 안돼", isRunning, Math.floor(timer.time_left));
+
       if (timer.is_running) {
-        console.log("타이머 실행 시작");
         startTimer();
       }
     } catch (error) {
@@ -60,77 +60,119 @@ function Timer({ isAdmin: isOperator }) {
       setTimeLeft((prevSeconds) => {
         if (prevSeconds <= 1) {
           clearInterval(timerRef.current);
+
           setIsModalOpen(true);
+
           axios.post("/timer/reset");
+
           setIsRunning(false);
+
           if (isOperator) {
-            console.log("");
-            wsRef.current.send("Timer Complete");
+            console.log("Time Complete");
+            // pyWsRef.current.send('Timer Complete');
           }
 
           return 0;
         }
+        setProgress(((prevSeconds - 1) / inputSecond) * 100); // progress를 남은 시간 비율에 따라 업데이트
         return prevSeconds - 1;
       });
     }, 1000);
   };
 
-  // python ws
+  // 태섭 ws fastapi
   // useEffect(() => {
-  //   pyWsRef.current = new WebSocket(
-  //     "ws://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com:8000/ws/timer"
+  //   tsWsRef.current = new WebSocket(
+  //     'ws://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com/ws/timer'
   //   );
-  //   console.log("파이썬 useEffect 실행", pyWsRef.current);
-  //   pyWsRef.current.onopen = () => {
-  //     console.log("파이썬 ws");
+  //   tsWsRef.current.onopen = () => {
+  //     console.log('태섭 ws 연결');
   //   };
-  // }, []);
+  // });
+
+  // python ws/timer
+  useEffect(() => {
+    pyWsRef.current = new WebSocket(tokenData.websocketurl);
+    pyWsRef.current.onopen = () => {
+      console.log("파이썬 ws 연결");
+    };
+
+    try {
+      pyWsRef.current.onmessage = (event) => {
+        // console.log('Python WS에서 메시지가 온거 같다?', event.data);
+        const data = JSON.parse(event.data);
+        console.log("Message from server:", data, data.action);
+
+        if (data.action === "start") {
+          console.log("WS start!");
+          setIsRunning(true);
+          setTimeLeft(timeLeft);
+          startTimer();
+        } else if (data.action === "reset") {
+          console.log("WS Reset!");
+          setIsRunning(false);
+          setTimeLeft(inputSecond);
+          clearInterval(timerRef.current);
+        } else if (data.action === "All true") {
+          console.log("All True");
+        } else {
+          console.log("Else");
+        }
+      };
+    } catch (error) {
+      console.error(error, "ERROR");
+    }
+
+    return () => {
+      pyWsRef.current.close();
+      console.log("파이썬 WS 연결이 종료 됨");
+    };
+  }, []);
 
   // ------------------------ web Socket 로컬 호스트 테스트 ----------------
   // local 8000 ws 간이 테스트 (서버에서 web socket 관리 기능 필요)
-  useEffect(() => {
-    console.log("웹소켓으로부터 받은 메시지", wsMessage);
-    wsRef.current = new WebSocket("ws://localhost:8000/ws/timer_10min");
+  // useEffect(() => {
+  //   console.log('웹소켓으로부터 받은 메시지', wsMessage);
+  //   wsRef.current = new WebSocket('ws://localhost:8000/ws/timer_10min');
 
-    // 웹소켓 이벤트 핸들러 (메시지 받는 경우)
-    wsRef.current.onmessage = (event) => {
-      console.log("Message 받았음 핸들러!!!");
-      const newMessage = event.data;
-      setWsMessage(newMessage);
-      if (event.data === "start") {
-        console.log("정상 시작!", event.data, timeLeft);
-        setIsRunning(true);
-        setTimeLeft(timeLeft);
+  //   // 웹소켓 이벤트 핸들러 (메시지 받는 경우)
+  //   wsRef.current.onmessage = (event) => {
+  //     console.log('Message 받았음 핸들러!!!');
+  //     const newMessage = event.data;
+  //     setWsMessage(newMessage);
+  //     if (event.data === 'start') {
+  //       console.log('정상 시작!', event.data, timeLeft);
+  //       setIsRunning(true);
+  //       setTimeLeft(timeLeft);
 
-        // start일 때에만 setInterval 시작
+  //       // start일 때에만 setInterval 시작
 
-        startTimer();
-      } else if (event.data === "reset") {
-        console.log("정상 리셋!", event.data);
-        setIsRunning(false);
-        console.log("리셋 할 때의 input Second!!!", inputSecond);
-        setTimeLeft(inputSecond);
-        clearInterval(timerRef.current);
-      } else if (event.data === "All true") {
-        console.log("All True가 실행되었어요!");
-      } else {
-        console.log("정상 else!", event.data);
-      }
-    };
+  //       startTimer();
+  //     } else if (event.data === 'reset') {
+  //       console.log('정상 리셋!', event.data);
+  //       setIsRunning(false);
 
-    // WebSocket 연결이 열렸을 때 실행될 이벤트 핸들러 설정
-    wsRef.current.onopen = () => {
-      console.log("WebSocket connection opened");
-    };
+  //       setTimeLeft(inputSecond);
+  //       clearInterval(timerRef.current);
+  //     } else if (event.data === 'All true') {
+  //     } else {
+  //       console.log('정상 else!', event.data);
+  //     }
+  //   };
 
-    wsRef.current.onclose = () => {
-      console.log("WebSocket Connection Closed");
-    };
+  //   // WebSocket 연결이 열렸을 때 실행될 이벤트 핸들러 설정
+  //   wsRef.current.onopen = () => {
+  //     console.log('WebSocket connection opened');
+  //   };
 
-    return () => {
-      wsRef.current.close();
-    };
-  }, []);
+  //   wsRef.current.onclose = () => {
+  //     console.log('WebSocket Connection Closed');
+  //   };
+
+  //   return () => {
+  //     wsRef.current.close();
+  //   };
+  // }, []);
 
   // ------------------------ web Socket 로컬 호스트 테스트 ----------------
 
@@ -139,7 +181,6 @@ function Timer({ isAdmin: isOperator }) {
   useEffect(() => {
     console.log("서버용 시간 확인");
     fetchTimeLeft();
-    console.log("@@@@@", timeLeft, isRunning);
 
     // 프론트 타이머 시간 관리
 
@@ -149,7 +190,7 @@ function Timer({ isAdmin: isOperator }) {
   // 진행 바의 색깔을 비율에 따라 변경
   const getBarColor = (percentage) => {
     if (!isRunning) return "gray";
-    if (percentage > 50) return "limegreen";
+    if (percentage > 50) return "#3fff00";
     if (percentage > 20) return "orange";
     return "red";
   };
@@ -163,13 +204,13 @@ function Timer({ isAdmin: isOperator }) {
   const handleStart = async () => {
     if (!isRunning) {
       setIsRunning(true);
-      console.log("Running 상태로 변경 : True");
-      wsRef.current.send("start");
+      pyWsRef.current.send(JSON.stringify({ action: "start" }));
     }
     // axios로 서버에 시작 요청
     try {
       // aws 서버용 (동일기능)
       const response = await axios.post(`/timer/start?duration=${inputSecond}`);
+
       // const response = await axios.post(
       //   `http://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com/timer/start?duration=${inputSecond}`
       // );
@@ -187,20 +228,11 @@ function Timer({ isAdmin: isOperator }) {
   const handleReset = async () => {
     setIsRunning(false);
     setTimeLeft(inputSecond);
-
+    pyWsRef.current.send(JSON.stringify({ action: "reset" }));
     try {
-      // aws 서버용 (동일기능)
       const response = await axios.post("/timer/reset");
-
-      // setupProxy 없이
-      // const response = await axios.post(
-      //   "http://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com/timer/reset"
-      // );
-
-      // local 서버용
-      // const response = await axios.post("http://localhost:8000/timer/reset");
       console.log(response, "Reset 완료!");
-      wsRef.current.send("reset");
+
       clearInterval(timerRef.current);
     } catch (error) {
       console.error("Error 났음, Reset에서");
@@ -216,8 +248,10 @@ function Timer({ isAdmin: isOperator }) {
 
   // 타이머 메시지 함수
   const renderMessage = () => {
-    if (isRunning && timeLeft > 0) {
-      return "시간이 가고 있어요!";
+    if (isRunning && timeLeft < 180) {
+      return "시간이 얼마 남지 않았어요!";
+    } else if (isRunning) {
+      return " ";
     } else if (!isRunning && timeLeft > 0) {
       return "시작하기 전이에요!";
     } else {
@@ -251,9 +285,10 @@ function Timer({ isAdmin: isOperator }) {
             disabled={isRunning}
           />
         )}
-        <div>Time Left: {timeLeft} seconds</div>
+
         {isOperator && (
           <>
+            <div>Time Left: {timeLeft} seconds</div>
             <button onClick={handleStart} disabled={isRunning}>
               Start
             </button>
@@ -276,7 +311,7 @@ function Timer({ isAdmin: isOperator }) {
         <Modal
           isModalOpen={isModalOpen}
           closeModal={closeModal}
-          wsRef={wsRef}
+          pyWsRef={pyWsRef}
         />
       )}
     </div>

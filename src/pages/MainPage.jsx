@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import tokenData from "../token.json";
-import "../css/App.css";
+// import "../css/App.css";
+import "../css/Main.css";
 
 function MainPage() {
   console.log(
@@ -36,21 +37,21 @@ function MainPage() {
 
   return (
     <>
-      <div className="App">
-        <header className="App-header">
-          <h1>Monst AR 랜딩 페이지</h1>
+      <div className='App'>
+        <header className='App-header'>
+          <h1>Monst AR</h1>
           <input
-            type="text"
-            placeholder="Enter code"
+            type='text'
+            placeholder='Enter code'
             value={inputCode}
             onChange={handleCodeChange}
             onKeyPress={handleKeyPress} // Enter 키 이벤트 핸들러 추가
             className={isCodeValid ? "" : "invalid-code"}
           />
           {!isCodeValid && (
-            <p className="error-message">Invalid code, please try again.</p>
+            <p className='error-message'>Invalid code, please try again.</p>
           )}
-          <button onClick={joinAsUser}>Join as User</button>
+          <button onClick={joinAsUser}>Join</button>
         </header>
       </div>
     </>

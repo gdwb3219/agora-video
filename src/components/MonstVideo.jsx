@@ -122,6 +122,8 @@ function MonstVideo({ isOperator }) {
       });
       const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
 
+      console.log(localVideoTrack, "12.=== deep 적용 로컬 트랙 생성!!!");
+
       const uid = Math.floor(Math.random() * 10000); // UID 생성
       let token = await fetchToken(uid, options.channel, options.role);
       if (!token) {
@@ -207,6 +209,7 @@ function MonstVideo({ isOperator }) {
         )}
 
         <button
+          // className='custom-button'
           id="change-filter-button"
           onClick={changeFilter}
           disabled={isSwitchingEffect}

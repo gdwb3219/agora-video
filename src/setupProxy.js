@@ -4,7 +4,8 @@ module.exports = function (app) {
   app.use(
     "/timer",
     createProxyMiddleware({
-      target: "http://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com",
+      target:
+        "http://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com/timer",
       changeOrigin: true,
     })
   );

@@ -1,13 +1,12 @@
-// Prod 버전 Video 구현 정리
 import React, { useEffect, useRef, useState } from "react";
 import * as deepar from "deepar";
 import AgoraRTC from "agora-rtc-sdk-ng";
+import axios from "axios";
 import "../css/MonstVideo.css";
 import tokenData from "../token.json";
 
 const licenseKey = tokenData.licenseKey;
 const appId = tokenData.appId;
-const token = tokenData.token;
 const channel = tokenData.channel;
 
 const effectList = [
@@ -31,12 +30,15 @@ const effectList = [
 ];
 
 function MonstVideo({ isOperator }) {
-  // Log the version. Just in case.
-  console.log("Deepar version: " + deepar.version);
-  console.log("Agora version: " + AgoraRTC.VERSION);
   const [filterIndex, setFilterIndex] = useState(0);
   const [isSwitchingEffect, setIsSwitchingEffect] = useState(false);
-  // UseRef
+  const [options, setOptions] = useState({
+    appId: appId,
+    channel: channel,
+    role: "host",
+  });
+  const [token, setToken] = useState(null);
+
   const localElementRef = useRef(null);
   const remoteElementRef = useRef(null);
   const agoraEngineRef = useRef(
@@ -46,126 +48,109 @@ function MonstVideo({ isOperator }) {
 
   const agoraEngine = agoraEngineRef.current;
 
-  // Deep AR 시작
+  const fetchToken = async (uid, channelName, tokenRole) => {
+    try {
+      const response = await axios.post(
+        "http://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com/generate-token",
+        {
+          uid: uid,
+          channelName: channelName,
+          role: tokenRole === "host" ? "publisher" : "subscriber",
+        },
+        {
+          headers: {
+            "Content-Type": "application/json; charset=UTF-8",
+          },
+        }
+      );
+      return response.data.token;
+    } catch (error) {
+      console.error("Error fetching token:", error);
+    }
+  };
+
   const deepARInit = async () => {
-    console.log("222.===deepARInit 함수 실행");
-    console.log(localElementRef.current, "333.===Ref가 있는지 확인!!!");
-    console.log("444.=== 와드");
     if (!DeepARRef.current) {
       try {
-        console.log("555.===Try문 실행됨");
         DeepARRef.current = await deepar.initialize({
           licenseKey: licenseKey,
-          // 아래 요소는 canvas 또는 video 태그일 것
           previewElement: localElementRef.current,
           effect: effectList[filterIndex],
-          // rootPath: "/deepar-resources",
         });
-        console.log("666.===deepar 초기화 완료!!!");
         return DeepARRef.current;
       } catch (error) {
         console.error("Failed to init Deep AR", error);
       }
     } else {
-      console.log("DeepAR is already initialized.");
       return DeepARRef.current;
     }
   };
 
-  // ******************************************************
-  // useEffect 비동기 메인 함수
-  // ******************************************************
-
   useEffect(() => {
-    // console.log("deepAREnginedeepAREnginedeepAREngine", deepAREngine);
-
     const handleUserJoined = async (user, mediaType) => {
-      console.log("16.=== User Joined 이벤트 발생!");
       const remoteId = user.uid;
-
-      console.log("17.=== remote Stream Ref에 push 로 추가!");
-      // remote 화질 저하
-
-      // 유저의 미디어를 수신한다!!!
       await agoraEngine.subscribe(user, mediaType);
-      console.log("18.=== agora Subscribe!!! 완료!!");
-
       if (mediaType === "video") {
-        console.log("19-1.=== user의 mediaType이 video 타입 인것으로 확인!");
-        agoraEngine.setRemoteVideoStreamType(user.uid, 1);
         const remoteVideoTrack = user.videoTrack;
         const remotePlayerContainer = remoteElementRef.current;
-        console.log("20-1.=== remote Player Container 생성!");
-        console.log("21-1.=== document에 태그 객체 append 완료!!!");
-        console.log("22-1.=== 후후후 play 전");
         remoteVideoTrack.play(remotePlayerContainer);
-        console.log("23-1.=== 후후후 play 후");
       } else if (mediaType === "audio") {
-        console.log("19-2.=== user의 mediaType이 audio 타입 인것으로 확인!");
         const remoteAudioTrack = user.audioTrack;
         remoteAudioTrack.play();
-      } else {
-        console.log("19-3.=== user의 mediaType이 미확인!");
       }
     };
 
-    // **************************************************
-    // 내 기준 방에 다른 유저가 나갔다.
     const handleUserLeft = async (user) => {
-      console.log("24.===user 삭제!!!");
+      console.log("User left:", user.uid);
     };
 
     const handleJoined = async (user) => {
-      console.log("15.=== User Joined:", user.uid);
-      // 원격 사용자가 참가했을 때 해당 사용자를 상태로 관리
+      console.log("User Joined:", user.uid);
     };
 
     const joinAndDisplayLocalStream = async () => {
       const deepAREngine = await deepARInit();
-      console.log(typeof deepAREngine, "777.=== deepAREngine 생성");
-
       agoraEngine.on("user-joined", handleJoined);
       agoraEngine.on("user-published", handleUserJoined);
       agoraEngine.on("user-left", handleUserLeft);
 
-      console.log("888.===이벤트 핸들러 빼고 join함수 시작");
-
       const canvas = await deepAREngine.getCanvas();
-      console.log("999.=== deepAREnging.getCanvas()실행!!!");
       const outputStream = canvas.captureStream(30);
       const videoTrack = outputStream.getVideoTracks()[0];
-      console.log("10.===agora 실행 전");
-      console.log("11.===agora 실행 후, 커스텀 실행 전");
       const localVideoTrack = await AgoraRTC.createCustomVideoTrack({
         mediaStreamTrack: videoTrack,
       });
       const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-      console.log(localVideoTrack, "12.=== deep 적용 로컬 트랙 생성!!!");
 
-      const localUID = await agoraEngine.join(appId, channel, token);
+      const uid = Math.floor(Math.random() * 10000); // UID 생성
+      let token = await fetchToken(uid, options.channel, options.role);
+      if (!token) {
+        console.error("Failed to fetch token.");
+        return;
+      }
 
-      console.log(localUID, "13.===localUIDlocalUID, 로컬 아이디 등록!!!");
-
+      const localUID = await agoraEngine.join(appId, channel, token, uid);
       await agoraEngine.publish([localVideoTrack, localAudioTrack]);
-      console.log("14.=== agora Publish 완료");
     };
 
     const joinJustLocalStream = async () => {
-      console.log("***.===관리자 Stream Join");
       agoraEngine.on("user-joined", handleJoined);
       agoraEngine.on("user-published", handleUserJoined);
       agoraEngine.on("user-left", handleUserLeft);
+      const uid = Math.floor(Math.random() * 10000); // UID 생성
+      let token = await fetchToken(uid, options.channel, options.role);
+      if (!token) {
+        console.error("Failed to fetch token.");
+        return;
+      }
 
-      const AdminID = await agoraEngine.join(appId, channel, token);
+      await agoraEngine.join(appId, options.channel, token, uid);
     };
 
     const joinStream = async () => {
-      console.log("111.===Join Stream 시작");
       if (!isOperator) {
-        // isOperator False 인 경우 (일반 유저)
         await joinAndDisplayLocalStream();
       } else {
-        // 관리자인 경우
         await joinJustLocalStream();
       }
     };
@@ -182,7 +167,6 @@ function MonstVideo({ isOperator }) {
       setIsSwitchingEffect(true);
       try {
         const newIndex = (filterIndex + 1) % effectList.length;
-        // 기존 필터를 유지하며 새로운 필터를 비동기적으로 적용
         await DeepARRef.current.switchEffect(effectList[newIndex], {
           replaceCurrent: true,
         });
@@ -197,33 +181,33 @@ function MonstVideo({ isOperator }) {
 
   return (
     <>
-      <div id='Videos-Container'>
+      <div id="Videos-Container">
         {!isOperator ? (
           <>
             <div
-              id='local-video'
+              id="local-video"
               ref={localElementRef}
-              className='video-box'
+              className="video-box"
               style={{ width: "50%" }}
             ></div>
             <div
-              id='remote-video'
+              id="remote-video"
               ref={remoteElementRef}
-              className='video-box'
+              className="video-box"
               style={{ width: "50%" }}
             ></div>
           </>
         ) : (
           <div
-            id='remote-video'
+            id="remote-video"
             ref={remoteElementRef}
-            className='video-box'
+            className="video-box"
             style={{ display: "flex", width: "100%" }}
           ></div>
         )}
 
         <button
-          id='change-filter-button'
+          id="change-filter-button"
           onClick={changeFilter}
           disabled={isSwitchingEffect}
         >

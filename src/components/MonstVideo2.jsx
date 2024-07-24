@@ -74,7 +74,10 @@ function MonstVideo2({ isOperator }) {
         agoraEngine.setRemoteVideoStreamType(user.uid, 1);
         const remoteVideoTrack = user.videoTrack;
         const remotePlayerContainer = remoteElementRef.current;
-        console.log("20-1.=== remote Player Container 생성!");
+        console.log(
+          "20-1.=== remote Player Container 생성",
+          remotePlayerContainer
+        );
         console.log("21-1.=== document에 태그 객체 append 완료!!!");
         console.log("22-1.=== 후후후 play 전");
         remoteVideoTrack.play(remotePlayerContainer);
@@ -137,6 +140,8 @@ function MonstVideo2({ isOperator }) {
       agoraEngine.on("user-joined", handleJoined);
       agoraEngine.on("user-published", handleUserJoined);
       agoraEngine.on("user-left", handleUserLeft);
+
+      const AdminID = await agoraEngine.join(appId, channel, token);
     };
 
     const joinStream = async () => {
@@ -178,13 +183,36 @@ function MonstVideo2({ isOperator }) {
   return (
     <>
       <div id='Videos-Container2'>
-        hi video
-        <div id='local-video2' ref={localElementRef} className='video-box'>
+        {/* <div id='local-video2' ref={localElementRef} className='video-box'>
           localVideo
         </div>
-        {/* <div id='remote-video2' ref={remoteElementRef} className='video-box'>
+        <div id='remote-video2' ref={remoteElementRef} className='video-box'>
           remoteVideo
         </div> */}
+
+        {!isOperator ? (
+          <>
+            <div
+              id='local-video2'
+              ref={localElementRef}
+              className='video-box'
+              style={{ width: "50%" }}
+            ></div>
+            <div
+              id='remote-video2'
+              ref={remoteElementRef}
+              className='video-box'
+              style={{ width: "50%" }}
+            ></div>
+          </>
+        ) : (
+          <div
+            id='remote-video2'
+            ref={remoteElementRef}
+            className='video-box'
+            style={{ display: "flex", width: "100%" }}
+          ></div>
+        )}
       </div>
     </>
   );

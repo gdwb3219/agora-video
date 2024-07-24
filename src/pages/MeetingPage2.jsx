@@ -21,15 +21,16 @@ function MeetingPage2() {
     console.log("useEffect 실행 와드---", isAdmin);
     setInCall(true);
   }, []);
+
   return (
     <>
       <NavBar />
-      <div className='total-container'>
-        <div className='meeting-content'>
+      <div className="total-container">
+        <div className="meeting-content">
           <MonstVideo2 isOperator={isAdmin} />
           <Timer2 isAdmin={isAdmin} />
         </div>
-        <div className='card-content'>
+        <div className="card-content">
           <CardBoard />
         </div>
       </div>

@@ -18,8 +18,8 @@ function Modal({ isModalOpen, closeModal, wsRef }) {
         // console.log("Interval 실행 중!!!#2", qtime, prevSeconds);
         if (prevSeconds <= 1) {
           clearInterval(qtimeRef.current);
-          setRedirect("qna");
-
+          wsRef.current.send("User가 제한 시간 내 선택하지 않았습니다.");
+          window.location.href = "https://forms.gle/ytJQ6kRqPwBHQGxP7";
           return 0;
         }
         return prevSeconds - 1;
@@ -37,6 +37,8 @@ function Modal({ isModalOpen, closeModal, wsRef }) {
       if (event.data === "All true") {
         console.log("modal도 All True가 실행되었어요!!!");
         setRedirect("next");
+      } else {
+        console.log("ws로부터 메시지 도착", event.data);
       }
     };
   }, []);
@@ -71,15 +73,8 @@ function Modal({ isModalOpen, closeModal, wsRef }) {
         <h3>서로의 얼굴이 궁금하다면 {qtime}</h3>
         <h3>필터 해제에 동의 해주세요</h3>
         <p>모두 동의 시 5분의 추가 시간이 주어집니다.</p>
-        <button onClick={handleFalse}>
-          {/* <a href='/'>여기서 그만하기</a> */}
-          <Link to='/qna'>여기서 그만하기</Link>
-        </button>
-        {/* <button>
-          <Link to='/meeting2' state={{ isAdmin: false }} onClick={handleTrue}>
-            동의하고 계속하기
-          </Link>
-        </button> */}
+        <button onClick={handleFalse}>여기서 그만하기</button>
+
         <button onClick={handleTrue}>동의하고 계속하기</button>
         <h3>{answer}</h3>
       </ReactModal>

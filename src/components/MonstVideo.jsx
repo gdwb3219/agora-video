@@ -12,21 +12,14 @@ const channel = tokenData.channel_filter;
 const effectList = [
   "effects/Bomb.deepar",
   "effects/three-eye-monster.deepar",
-  "effects/ray-ban-wayfarer.deepar",
-  "effects/viking_helmet.deepar",
-  "effects/MakeupLook.deepar",
-  "effects/Split_View_Look.deepar",
-  "effects/flower_face.deepar",
-  "effects/Stallone.deepar",
-  "effects/galaxy_background_web.deepar",
-  "effects/Humanoid.deepar",
-  "effects/Neon_Devil_Horns.deepar",
-  "effects/Ping_Pong.deepar",
-  "effects/Pixel_Hearts.deepar",
   "effects/Snail.deepar",
-  "effects/Hope.deepar",
   "effects/Vendetta_Mask.deepar",
-  "effects/Fire_Effect.deepar",
+  "effects/grinch.deepar",
+  "effects/Filter1.deepar",
+  "effects/Filter2.deepar",
+  "effects/Filter3.deepar",
+  "effects/Filter4.deepar",
+  "effects/Filter5.deepar",
 ];
 
 function MonstVideo({ isOperator }) {

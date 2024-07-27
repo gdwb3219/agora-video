@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import tokenData from "../token.json";
-// import "../css/App.css";
 import "../css/Main.css";
 
 function MainPage() {
@@ -12,7 +11,7 @@ function MainPage() {
   const [inputCode, setInputCode] = useState(""); // 사용자 입력 코드 상태
   const [isCodeValid, setIsCodeValid] = useState(true); // 코드 유효성 상태
 
-  const correctCode = tokenData.entryCode; // token.json에서 입장 코드를 불러옴
+  const entryCodes = tokenData.entryCodes; // token.json에서 입장 코드를 불러옴
   const navigate = useNavigate(); // useNavigate 훅 사용
 
   const handleCodeChange = (e) => {
@@ -20,7 +19,7 @@ function MainPage() {
   };
 
   const joinAsUser = () => {
-    if (inputCode === correctCode) {
+    if (entryCodes.includes(inputCode)) {
       setIsOperator(false);
       setIsCodeValid(true);
       navigate("/meeting", { state: { isAdmin: false } }); // 페이지 이동
@@ -29,29 +28,24 @@ function MainPage() {
     }
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      joinAsUser();
-    }
-  };
-
   return (
     <>
-      <div className='App'>
-        <header className='App-header'>
+      <div className="App">
+        <header className="App-header">
           <h1>Monst AR</h1>
           <input
-            type='text'
-            placeholder='Enter code'
+            type="text"
+            placeholder="Enter code"
             value={inputCode}
             onChange={handleCodeChange}
-            onKeyPress={handleKeyPress} // Enter 키 이벤트 핸들러 추가
             className={isCodeValid ? "" : "invalid-code"}
           />
           {!isCodeValid && (
-            <p className='error-message'>Invalid code, please try again.</p>
+            <p className="error-message">Invalid code, please try again.</p>
           )}
-          <button onClick={joinAsUser}>Join</button>
+          <button onClick={joinAsUser} className="join-button">
+            Join
+          </button>
         </header>
       </div>
     </>

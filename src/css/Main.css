@@ -1,3 +1,4 @@
+/* Main.css */
 .App-header {
   background-color: #202020;
   min-height: 100vh;
@@ -9,11 +10,27 @@
   color: #3fff00;
 }
 
-input.invalid-code {
-  border: 2px solid red;
+button.join-button {
+  background-color: #3fff00;
+  color: #202020;
+  font-size: calc(10px + 2vmin);
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+button.join-button:hover {
+  background-color: #2ecc71;
+  color: #ffffff;
+}
+
+.invalid-code {
+  border: 1px solid red;
 }
 
 .error-message {
   color: red;
-  font-size: 0.9em;
+  margin-top: 10px;
 }

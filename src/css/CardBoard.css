@@ -38,6 +38,8 @@
   padding: 10px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  word-wrap: break-word; /* 텍스트 줄바꿈 허용 */
+  white-space: pre-wrap; /* 공백 및 줄바꿈을 유지하며 여러 줄 표현 */
 }
 
 /* 개별 카드 스타일 (오픈) */

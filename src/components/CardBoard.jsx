@@ -84,7 +84,7 @@ function CardBoard() {
       <ul className='card-list'>
         {showIntroCard && (
           <div className='intro-card' onClick={handleIntroCardClick}>
-            간단한 자기소개 부탁해요!
+            간단한 자기소개 후 아래 버튼을 클릭하여 토픽 카드를 확인해보세요!
           </div>
         )}
         {selectedCards.map((card, index) => (

@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import "../css/Timer.css";
 import ReactModal from "react-modal";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Modal from "./Modal";
 import tokenData from "../token.json";
 
 const round1time = 20;
+const websocketurl = "wss://www.api.monst-ar.com/ws/timer";
 
 // 모달의 루트 엘리먼트를 설정
 ReactModal.setAppElement("#root");
@@ -23,6 +24,7 @@ function Timer({ isAdmin: isOperator }) {
   const [isRunning, setIsRunning] = useState(false); // 진행 중 여부
   const [inputSecond, setInputSecond] = useState(round1time); // 입력 초기값
   // 현재 남은 시간 확인 (서버용)
+  const navigate = useNavigate();
   const [timeLeft, setTimeLeft] = useState(round1time); // 초기 시간 설정
   // 현재 남은 시간 확인 (리액트용)
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
@@ -39,9 +41,12 @@ function Timer({ isAdmin: isOperator }) {
   // 서버 시간을 불러와서 state에 반영하는 함수
   const fetchTimeLeft = async () => {
     try {
-      const response = await axios.get("/timer/status");
+      const response = await axios.get(
+        "https://www.api.monst-ar.com/timer/status"
+      );
       const timer = response.data.timer;
-
+      console.log(response.data);
+      console.log(timer);
       setIsRunning(timer.is_running);
       setTimeLeft(timer.is_running ? Math.floor(timer.time_left) : inputSecond);
 
@@ -63,7 +68,7 @@ function Timer({ isAdmin: isOperator }) {
 
           setIsModalOpen(true);
 
-          axios.post("/timer/reset");
+          axios.post("https://www.api.monst-ar.com/timer/reset");
 
           setIsRunning(false);
 
@@ -82,11 +87,17 @@ function Timer({ isAdmin: isOperator }) {
 
   // python ws/timer 연결 웹소켓 엔드포인트
   useEffect(() => {
-    pyWsRef.current = new WebSocket(tokenData.websocketurl);
-    // pyWsRef.current = new WebSocket("ws://127.0.0.1:8000/ws/timer");
+    pyWsRef.current = new WebSocket("wss://www.api.monst-ar.com/ws/timer");
+    console.log(pyWsRef.current);
     pyWsRef.current.onopen = () => {
       console.log("파이썬 ws 연결");
     };
+    if (pyWsRef.current) {
+      console.log("서버용 시간 확인");
+      fetchTimeLeft();
+    } else {
+      console.log("WebSocket이 아직 연결되지 않았습니다.");
+    }
 
     try {
       pyWsRef.current.onmessage = (event) => {
@@ -104,10 +115,12 @@ function Timer({ isAdmin: isOperator }) {
           setIsRunning(false);
           setTimeLeft(inputSecond);
           clearInterval(timerRef.current);
+        } else if (data.action === "shutdown" && !isOperator) {
+          console.log("WS Shutdown!");
+          // pyWsRef.current.close();
+          navigate("/");
         } else if (data.action === "All true") {
           console.log("All True");
-        } else if (data.action === "shutdown") {
-          console.log("Shut Down 동작");
         } else {
           console.log("Else");
         }
@@ -172,10 +185,12 @@ function Timer({ isAdmin: isOperator }) {
   // useEffect 서버 시간
   // client 상태 바뀔 때마다 변경 요청
   useEffect(() => {
-    console.log("서버용 시간 확인");
-    fetchTimeLeft();
-
-    // 프론트 타이머 시간 관리
+    if (pyWsRef.current && pyWsRef.current.readyState === WebSocket.OPEN) {
+      console.log("서버용 시간 확인");
+      fetchTimeLeft();
+    } else {
+      console.log("WebSocket이 아직 연결되지 않았습니다.");
+    }
 
     return () => clearInterval(timerRef.current);
   }, []);
@@ -202,7 +217,9 @@ function Timer({ isAdmin: isOperator }) {
     // axios로 서버에 시작 요청
     try {
       // aws 서버용 (동일기능)
-      const response = await axios.post(`/timer/start?duration=${inputSecond}`);
+      const response = await axios.post(
+        `https://www.api.monst-ar.com/timer/start?duration=${inputSecond}`
+      );
 
       // const response = await axios.post(
       //   `http://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com/timer/start?duration=${inputSecond}`
@@ -238,11 +255,17 @@ function Timer({ isAdmin: isOperator }) {
     setInputSecond(newInputSecond);
     // setTimeLeft(newTime);
   };
-
-  const handleShutdown = () => {
+  const handleShutdown = async () => {
     pyWsRef.current.send(JSON.stringify({ action: "shutdown" }));
+    try {
+      const response = await axios.post(
+        "`https://www.api.monst-ar.com/timer/shutdown"
+      );
+      console.log(response, "Shutdown 완료!");
+    } catch (error) {
+      console.error("Error 났음, Shutdown에서");
+    }
   };
-
   // 타이머 메시지 함수
   const renderMessage = () => {
     if (isRunning && timeLeft < 180) {
@@ -291,6 +314,7 @@ function Timer({ isAdmin: isOperator }) {
             </button>
 
             <button onClick={handleReset}>Reset</button>
+            <button onClick={handleShutdown}>Shutdown</button>
 
             <button>
               <Link to='/meeting2' state={{ isAdmin: true }}>

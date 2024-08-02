@@ -3,6 +3,7 @@ import "../css/Timer.css";
 import ReactModal from "react-modal";
 import axios from "axios";
 import tokenData from "../token.json";
+import { useNavigate } from "react-router-dom";
 
 const round2time = 30;
 
@@ -25,7 +26,7 @@ function Timer2({ isAdmin: isOperator }) {
   // 현재 남은 시간 확인 (리액트용)
   const [progress, setProgress] = useState(100); // 진행률 초기 설정
   const timerRef = useRef(null);
-
+  const navigate = useNavigate();
   // web socket 전용 state
   // const [ws, setWs] = useState(null);
   // const wsRef = useRef(null);
@@ -76,7 +77,7 @@ function Timer2({ isAdmin: isOperator }) {
   // ------------------------ web Socket 로컬 호스트 테스트 ----------------
   // local 8000 ws 간이 테스트 (서버에서 web socket 관리 기능 필요)
   useEffect(() => {
-    pyWsRef.current = new WebSocket(tokenData.websocketurl);
+    pyWsRef.current = new WebSocket("wss://www.api.monst-ar.com/ws/timer");
     pyWsRef.current.onopen = () => {
       console.log("파이썬 ws 연결");
     };
@@ -96,6 +97,10 @@ function Timer2({ isAdmin: isOperator }) {
         setIsRunning(false);
         setTimeLeft(inputSecond);
         clearInterval(timerRef.current);
+      } else if (data.action === "shutdown" && !isOperator) {
+        console.log("WS Shutdown!");
+        // pyWsRef.current.close();
+        navigate("/");
       } else {
         console.log("정상 else!", event.data);
       }
@@ -173,7 +178,17 @@ function Timer2({ isAdmin: isOperator }) {
     setInputSecond(newInputSecond);
     // setTimeLeft(newTime);
   };
-
+  const handleShutdown = async () => {
+    pyWsRef.current.send(JSON.stringify({ action: "shutdown" }));
+    try {
+      const response = await axios.post(
+        "`https://www.api.monst-ar.com/timer/shutdown"
+      );
+      console.log(response, "Shutdown 완료!");
+    } catch (error) {
+      console.error("Error 났음, Shutdown에서");
+    }
+  };
   // 타이머 메시지 함수
   const renderMessage = () => {
     if (isRunning && timeLeft < 180) {
@@ -221,6 +236,7 @@ function Timer2({ isAdmin: isOperator }) {
             </button>
 
             <button onClick={handleReset}>Reset</button>
+            <button onClick={handleShutdown}>Shutdown</button>
           </>
         )}
       </div>

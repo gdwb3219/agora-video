@@ -36,7 +36,9 @@ function Timer2({ isAdmin: isOperator }) {
   const fetchTimeLeft = async () => {
     try {
       console.log("서버 시간 불러온ㄷ!!!");
-      const response = await axios.get("/timer/status");
+      const response = await axios.get(
+        "https://www.api.monst-ar.com/timer/status"
+      );
       const timer = response.data.timer;
       console.log(timer.is_running, timer.time_left, "response Data");
       setIsRunning(timer.is_running);
@@ -58,7 +60,7 @@ function Timer2({ isAdmin: isOperator }) {
       setTimeLeft((prevSeconds) => {
         if (prevSeconds <= 1) {
           clearInterval(timerRef.current);
-          axios.post("/timer/reset");
+          axios.post("https://www.api.monst-ar.com/timer/reset");
           setIsRunning(false);
           if (!isOperator) {
             window.location.href = "https://forms.gle/gYvNCvFbtBFQYgeA9";
@@ -140,7 +142,9 @@ function Timer2({ isAdmin: isOperator }) {
     }
     // axios로 서버에 시작 요청
     try {
-      const response = await axios.post(`/timer/start?duration=${inputSecond}`);
+      const response = await axios.post(
+        `https://www.api.monst-ar.com//timer/start?duration=${inputSecond}`
+      );
       console.log(response, "서버 시간 start 됐다?");
     } catch (error) {
       console.error("왜 Error가 났는 지 찾아보기");
@@ -152,7 +156,9 @@ function Timer2({ isAdmin: isOperator }) {
     setTimeLeft(inputSecond);
     pyWsRef.current.send(JSON.stringify({ action: "reset" }));
     try {
-      const response = await axios.post("/timer/reset");
+      const response = await axios.post(
+        "https://www.api.monst-ar.com//timer/reset"
+      );
       console.log(response, "Reset 완료!");
 
       clearInterval(timerRef.current);
@@ -182,13 +188,13 @@ function Timer2({ isAdmin: isOperator }) {
   };
 
   return (
-    <div className='timer-container'>
-      <div className='timer-display' style={{ color: getBarColor(progress) }}>
+    <div className="timer-container">
+      <div className="timer-display" style={{ color: getBarColor(progress) }}>
         {isRunning ? formatTime(timeLeft) : "시작 전"}
       </div>
-      <div className='progress-bar'>
+      <div className="progress-bar">
         <div
-          className='progress-bar-fill'
+          className="progress-bar-fill"
           style={{
             width: `${progress}%`,
             backgroundColor: getBarColor(progress),
@@ -201,7 +207,7 @@ function Timer2({ isAdmin: isOperator }) {
       <div>
         {isOperator && (
           <input
-            type='number'
+            type="number"
             value={inputSecond}
             onChange={handleInputChange}
             disabled={isRunning}

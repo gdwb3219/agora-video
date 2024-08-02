@@ -85,17 +85,7 @@ function Timer({ isAdmin: isOperator }) {
     }, 1000);
   };
 
-  // 태섭 ws fastapi
-  // useEffect(() => {
-  //   tsWsRef.current = new WebSocket(
-  //     'ws://ec2-3-107-70-86.ap-southeast-2.compute.amazonaws.com/ws/timer'
-  //   );
-  //   tsWsRef.current.onopen = () => {
-  //     console.log('태섭 ws 연결');
-  //   };
-  // });
-
-  // python ws/timer
+  // python ws/timer 연결 웹소켓 엔드포인트
   useEffect(() => {
     pyWsRef.current = new WebSocket("wss://www.api.monst-ar.com/ws/timer");
     console.log(pyWsRef.current);
@@ -331,6 +321,7 @@ function Timer({ isAdmin: isOperator }) {
                 관리자 meeting2 입장
               </Link>
             </button>
+            <button onClick={handleShutdown}>Shut Down</button>
           </>
         )}
       </div>

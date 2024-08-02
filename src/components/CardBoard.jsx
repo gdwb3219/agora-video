@@ -97,6 +97,7 @@ function CardBoard() {
   // 처음 자기소개 카드
   const handleIntroCardClick = () => {
     setShowIntroCard(false);
+    updateCards();
   };
 
   const handleCard = async () => {
@@ -113,10 +114,10 @@ function CardBoard() {
   };
 
   return (
-    <div className='card-board'>
-      <ul className='card-list'>
+    <div className="card-board">
+      <ul className="card-list">
         {showIntroCard && (
-          <div className='intro-card' onClick={handleIntroCardClick}>
+          <div className="intro-card" onClick={handleIntroCardClick}>
             간단한 자기소개 부탁해요!
           </div>
         )}
@@ -134,7 +135,7 @@ function CardBoard() {
           </li>
         ))}
       </ul>
-      <button className='update-button' onClick={updateCards}>
+      <button className="update-button" onClick={updateCards}>
         + 토픽 카드 새로 고침
       </button>
       {/* <button onClick={handleCard}>random Card</button> */}

@@ -15,16 +15,13 @@ function CardBoard() {
   useEffect(() => {
     // ************************************************************
     // 실제 서버 연결 시
-    // cardWsRef.current = new WebSocket(
-    //   "wss://www.api.monst-ar.com/ws/random-items"
-    // );
+    cardWsRef.current = new WebSocket(
+      "wss://www.api.monst-ar.com/ws/random-items"
+    );
     // ************************************************************
 
     // ************************************************************
     // 테스트 로컬 서버 연결 시
-    cardWsRef.current = new WebSocket(
-      "wss://www.api.monst-ar.com/ws/random-items"
-    );
     // ************************************************************
     cardWsRef.current.onopen = () => {
       console.log("CARD 랜덤 소켓!");
